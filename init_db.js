@@ -12,11 +12,12 @@ db.serialize(() => {
     // 3. Insertar productos de prueba
     const stmt = db.prepare("INSERT INTO productos (nombre, precio, imagen, categoria, stock) VALUES (?, ?, ?, ?, ?)");
     
-    stmt.run("Arroz Grado 1 (1kg)", 1200, "https://via.placeholder.com/150", "Abarrotes", 50);
-    stmt.run("Leche Entera 1L", 1050, "https://via.placeholder.com/150", "Lácteos", 30);
-    stmt.run("Aceite Vegetal 900ml", 2500, "https://via.placeholder.com/150", "Abarrotes", 20);
-    stmt.run("Detergente Multiuso", 4500, "https://via.placeholder.com/150", "Limpieza", 15);
-    stmt.run("Pack de Yogur (4u)", 1800, "https://via.placeholder.com/150", "Lácteos", 25);
+    // stmt.run :
+stmt.run("Arroz Grado 1 (1kg)", 1200, "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400", "Abarrotes", 50);
+stmt.run("Leche Entera 1L", 1050, "https://images.unsplash.com/photo-1550583724-b26cc28df5d1?w=400", "Lácteos", 30);
+stmt.run("Aceite Vegetal 900ml", 2500, "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400", "Abarrotes", 20);
+stmt.run("Detergente Multiuso", 4500, "https://images.unsplash.com/photo-1584622781564-1d9876a13d00?w=400", "Limpieza", 15);
+stmt.run("Pack de Yogur (4u)", 1800, "https://images.unsplash.com/photo-1571212518486-d8285ee2b398?w=400", "Lácteos", 25);
     
     stmt.finalize();
     console.log("¡Base de datos del Minimarket lista y surtida!");

@@ -54,4 +54,20 @@ app.post('/registro', (req, res) => {
         if (err) return res.send("Error al registrar: " + err.message);
         res.send("<h1>¡Registro exitoso!</h1><a href='/'>Ir al inicio</a>");
     });
+}); // Ruta para ver la página de Login
+app.get('/login', (req, res) => {
+    res.render('login');
+});
+
+// Ruta para procesar el Login
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+    db.get("SELECT * FROM usuarios WHERE email = ? AND password = ?", [email, password], (err, row) => {
+        if (err) return res.send("Error en el servidor");
+        if (row) {
+            res.send(`<h1>Bienvenido de nuevo, ${row.nombre}</h1><a href='/'>Ir al catálogo</a>`);
+        } else {
+            res.send("<h1>Correo o contraseña incorrectos</h1><a href='/login'>Volver a intentar</a>");
+        }
+    });
 });
