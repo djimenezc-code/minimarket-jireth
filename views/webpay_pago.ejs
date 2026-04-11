@@ -1,0 +1,8 @@
+<html>
+<body onload="document.form.submit();">
+    <h2 style="text-align: center; font-family: sans-serif; margin-top: 50px;">Conectando con Webpay Seguro...</h2>
+    <form name="form" action="<%= url %>" method="POST">
+        <input type="hidden" name="token_ws" value="<%= token %>" />
+    </form>
+</body>
+</html>
