@@ -2,24 +2,79 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minimarket Jireth | Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimarket Jireth | Premium Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(255, 255, 255, 0.1); }
-        body { background: #0f172a; color: white; }
-        .card { background: #1e293b; border: none; transition: transform 0.3s; color: white; }
-        .card:hover { transform: translateY(-10px); }
-        .navbar { background: #1e293b !important; border-bottom: 1px solid #334155; }
-        .footer-section { background: #1e293b; padding: 40px 0; border-top: 2px solid #22c55e; }
+        :root { --primary: #10b981; --dark: #0f172a; --light-bg: #f8fafc; }
+        body { background-color: var(--light-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--dark); }
+        
+        /* Navbar moderna con Blur */
+        .navbar { 
+            background: rgba(255, 255, 255, 0.8) !important; 
+            backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .navbar-brand { font-weight: 800; letter-spacing: -1px; color: var(--primary) !important; }
+
+        /* Tarjetas de Producto estilo Glass */
+        .card-product {
+            background: white;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-product:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .img-container {
+            height: 220px;
+            overflow: hidden;
+            border-radius: 15px;
+            margin: 10px;
+        }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Botones Tech */
+        .btn-add {
+            background: var(--dark);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 10px 20px;
+        }
+        .btn-add:hover { background: var(--primary); color: white; }
+        
+        /* Footer Pro */
+        .footer-tech {
+            background: white;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding: 80px 0 40px;
+            margin-top: 100px;
+        }
+        .map-container {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 5px solid white;
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow">
+
+    <nav class="navbar navbar-expand-lg sticky-top py-3">
         <div class="container">
-            <a class="navbar-brand fw-bold text-success" href="/">JIRETH TECH-STORE</a>
-            <div class="d-flex align-items-center">
-                <a href="/carrito" class="btn btn-success position-relative">
-                    🛒 Carrito
+            <a class="navbar-brand fs-3" href="#">JIRETH<span class="text-dark">STORE</span></a>
+            
+            <div class="d-flex align-items-center gap-2">
+                <a href="/login" class="btn btn-link text-dark text-decoration-none fw-600">Entrar</a>
+                <a href="/registro" class="btn btn-dark rounded-pill px-4 shadow-sm">Registrarse</a>
+                
+                <a href="/carrito" class="ms-3 btn btn-light rounded-circle shadow-sm position-relative p-2" style="width: 45px; height: 45px;">
+                    🛒
                     <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                         <%= cantidad %>
                     </span>
@@ -28,51 +83,72 @@
         </div>
     </nav>
 
-    <div class="container my-5">
-        <h2 class="text-center mb-5 fw-bold">Nuestros Productos</h2>
-        <div class="row">
+    <header class="container py-5 text-center">
+        <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill mb-3">Minimarket Digital</span>
+        <h1 class="display-4 fw-bold mb-3">Tu despensa, a un <span class="text-success">clic.</span></h1>
+        <p class="text-muted fs-5">Tecnología aplicada a tu comodidad diaria.</p>
+    </header>
+
+    <main class="container">
+        <div class="row g-4">
             <% productos.forEach(function(prod) { %>
-                <div class="col-md-3 mb-4">
-                    <div class="card h-100 shadow">
-                        <img src="<%= prod.imagen %>" class="card-img-top" style="height:180px; object-fit:cover;">
-                        <div class="card-body">
-                            <span class="badge bg-success mb-2"><%= prod.categoria %></span>
-                            <h5 class="card-title"><%= prod.nombre %></h5>
-                            <h4 class="text-success">$<%= prod.precio %></h4>
-                            <small class="text-muted">Stock: <%= prod.stock %></small>
-                            <button class="btn btn-outline-success w-100 mt-3" onclick="add('<%= prod.id %>', '<%= prod.nombre %>', '<%= prod.precio %>')">Agregar</button>
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card-product h-100 d-flex flex-column">
+                        <div class="img-container">
+                            <img src="<%= prod.imagen %>" alt="<%= prod.nombre %>">
+                        </div>
+                        <div class="p-4 pt-0 mt-auto">
+                            <small class="text-success fw-bold text-uppercase" style="font-size: 10px; letter-spacing: 1px;"><%= prod.categoria %></small>
+                            <h5 class="fw-bold mb-1 text-dark"><%= prod.nombre %></h5>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="fs-4 fw-bold text-dark">$<%= prod.precio %></span>
+                                <button class="btn-add" onclick="add('<%= prod.id %>', '<%= prod.nombre %>', '<%= prod.precio %>')">
+                                    +
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             <% }); %>
         </div>
-    </div>
+    </main>
 
-    <section class="footer-section">
+    <footer class="footer-tech">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h4 class="text-success fw-bold">Visítanos</h4>
-                    <p>📍 <strong>Dirección:</strong> <%= info.direccion %></p>
-                    <p>⏰ <strong>Horarios:</strong> <%= info.horario %></p>
-                    <p>📞 <strong>Contacto:</strong> <%= info.telefono %></p>
-                    <iframe src="<%= info.mapa_url %>" width="100%" height="250" style="border:0; border-radius:15px;" allowfullscreen="" loading="lazy"></iframe>
+            <div class="row align-items-center">
+                <div class="col-lg-5 mb-5 mb-lg-0">
+                    <h2 class="fw-bold mb-4">Estamos donde <br><span class="text-success">nos necesites.</span></h2>
+                    <div class="mb-3 d-flex align-items-center">
+                        <div class="bg-success-subtle p-3 rounded-circle me-3 text-success">📍</div>
+                        <div><strong>Dirección:</strong><br><span class="text-muted"><%= info.direccion %></span></div>
+                    </div>
+                    <div class="mb-3 d-flex align-items-center">
+                        <div class="bg-success-subtle p-3 rounded-circle me-3 text-success">⏰</div>
+                        <div><strong>Horario de atención:</strong><br><span class="text-muted text-small"><%= info.horario %></span></div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success-subtle p-3 rounded-circle me-3 text-success">📞</div>
+                        <div><strong>Llámanos:</strong><br><span class="text-muted"><%= info.telefono %></span></div>
+                    </div>
                 </div>
-                <div class="col-md-6 text-center">
-                    <h4 class="text-success fw-bold">Administración</h4>
-                    <p>Acceso exclusivo para personal autorizado</p>
-                    <a href="/admin" class="btn btn-secondary">Panel de Control</a>
+                <div class="col-lg-7">
+                    <div class="map-container">
+                        <iframe src="<%= info.mapa %>" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
                 </div>
             </div>
+            <div class="mt-5 pt-5 border-top text-center text-muted small">
+                &copy; 2024 Minimarket Jireth - Ingeniería de Software. | <a href="/admin" class="text-decoration-none text-muted">Panel Admin</a>
+            </div>
         </div>
-    </section>
+    </footer>
 
     <script>
         function add(id, nombre, precio) {
             fetch('/agregar-al-carrito', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `id=${id}&nombre=${encodeURIComponent(nombre)}&precio=${precio}`
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id, nombre, precio })
             })
             .then(res => res.json())
             .then(data => {
