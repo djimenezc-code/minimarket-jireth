@@ -6,6 +6,7 @@ const session = require('express-session');
 const { WebpayPlus, Options, IntegrationCommerceCodes, IntegrationApiKeys, Environment } = require('transbank-sdk');
 
 const app = express();
+app.use(express.static(path.join(__dirname, 'public')));
 const db = new sqlite3.Database('./minimarket.db');
 
 // --- CONFIGURACIÓN TÉCNICA ---

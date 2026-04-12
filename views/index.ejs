@@ -52,7 +52,9 @@
                 <div class="col-sm-6 col-md-4 col-lg-3">
                     <div class="card-product h-100 d-flex flex-column">
                         <div class="img-container">
-                            <img src="<%= prod.imagen %>" alt="<%= prod.nombre %>">
+                            <img src="<%= prod.imagen %>" 
+                            alt="<%= prod.nombre %>" 
+                            onerror="this.onerror=null; this.src='https://placehold.co/400x400?text=Jireth+Store';">
                         </div>
                         <div class="p-4 pt-0 mt-auto">
                             <small class="text-success fw-bold text-uppercase" style="font-size: 10px;"><%= prod.categoria %></small>
