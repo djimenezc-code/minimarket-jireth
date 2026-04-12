@@ -21,11 +21,13 @@ app.use(session({
     cookie: { secure: false } 
 }));
 
+// --- CONFIGURACIÓN DE INFORMACIÓN DEL NEGOCIO ---
 const storeInfo = {
-    direccion: "Av. Las Industrias 4050, Santiago",
+    direccion: "Av San Martin, Talagante",
     horario: "Lun-Sáb: 08:30 - 20:30 | Dom: 10:00 - 15:00",
-    telefono: "+56 2 2345 6789",
-    mapa: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3329.123456789!2d-70.64827!3d-33.4372!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzPCsDI2JzEzLjMiUyA3MMKwMzgnNTMuOCJX!5e0!3m2!1ses!2scl!4v1612345678901"
+    telefono: "+56 9 48 539049", // Tu nuevo teléfono
+    // Para el mapa, debes obtener el link de "Insertar mapa" de Google Maps
+    mapa:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3321.1101914710953!2d-70.9092431!3d-33.654306600000005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662e3d678a75cff%3A0xc39b82e12c257e82!2sSan%20Mart%C3%ADn%2C%20Talagante%2C%20Regi%C3%B3n%20Metropolitana!5e0!3m2!1ses!2scl!4v1775998583190!5m2!1ses!2scl" 
 };
 
 // --- MIDDLEWARE DE CONTEO GLOBAL ---
