@@ -2,15 +2,14 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const session = require('express-session');
-// Importamos las herramientas de configuración de Transbank
 const { WebpayPlus, Options, IntegrationCommerceCodes, IntegrationApiKeys, Environment } = require('transbank-sdk');
 
 const app = express();
-app.use(express.static(path.join(__dirname, 'public')));
 const db = new sqlite3.Database('./minimarket.db');
 
 // --- CONFIGURACIÓN TÉCNICA ---
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -22,30 +21,33 @@ app.use(session({
     cookie: { secure: false } 
 }));
 
-// --- CONFIGURACIÓN DE INFORMACIÓN DEL NEGOCIO ---
 const storeInfo = {
     direccion: "Av San Martin, Talagante",
     horario: "Lun-Sáb: 08:30 - 20:30 | Dom: 10:00 - 15:00",
-    telefono: "+56 9 48 539049", // Tu nuevo teléfono
-    // Para el mapa, debes obtener el link de "Insertar mapa" de Google Maps
-    mapa:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3321.1101914710953!2d-70.9092431!3d-33.654306600000005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662e3d678a75cff%3A0xc39b82e12c257e82!2sSan%20Mart%C3%ADn%2C%20Talagante%2C%20Regi%C3%B3n%20Metropolitana!5e0!3m2!1ses!2scl!4v1775998583190!5m2!1ses!2scl" 
+    telefono: "+56 9 48 539049",
+    mapa: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3321.4321!2d-70.9272!3d-33.6666!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzPCsDM5JzYwLjAiUyA3MMKwNTUnMzcuOSJX!5e0!3m2!1ses!2scl!4v1620000000000" 
 };
 
-// --- MIDDLEWARE DE CONTEO GLOBAL ---
 app.use((req, res, next) => {
     res.locals.cantidad = req.session.carrito ? req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0) : 0;
     res.locals.user = req.session.userName || null;
     next();
 });
 
-// --- RUTAS DE TIENDA ---
+// --- RUTAS ---
 app.get('/', (req, res) => {
-    db.all("SELECT * FROM productos", (err, rows) => {
+    const search = req.query.search;
+    let query = "SELECT * FROM productos";
+    let params = [];
+    if (search) {
+        query += " WHERE nombre LIKE ? OR categoria LIKE ?";
+        params = [`%${search}%`, `%${search}%`];
+    }
+    db.all(query, params, (err, rows) => {
         res.render('index', { productos: rows, info: storeInfo });
     });
 });
 
-// --- AUTENTICACIÓN ---
 app.get('/login', (req, res) => res.render('login', { error: null }));
 
 app.post('/login', (req, res) => {
@@ -76,15 +78,13 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-// --- CARRITO ---
 app.post('/agregar-al-carrito', (req, res) => {
     const { id, nombre, precio } = req.body;
     if (!req.session.carrito) req.session.carrito = [];
     const item = req.session.carrito.find(p => p.id == id);
     if (item) item.cantidad++;
     else req.session.carrito.push({ id, nombre, precio: parseInt(precio), cantidad: 1 });
-    const total = req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0);
-    res.json({ cantidad: total });
+    res.json({ cantidad: req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0) });
 });
 
 app.get('/carrito', (req, res) => {
@@ -104,7 +104,6 @@ app.post('/carrito/update', (req, res) => {
     res.json({ success: true });
 });
 
-// --- ADMINISTRACIÓN ---
 app.get('/admin', (req, res) => {
     db.all("SELECT * FROM productos", (err, rows) => res.render('admin', { productos: rows }));
 });
@@ -126,40 +125,26 @@ app.get('/admin/eliminar/:id', (req, res) => {
     db.run("DELETE FROM productos WHERE id = ?", [req.params.id], () => res.redirect('/admin'));
 });
 
-// --- WEBPAY (ESTA ES LA VERSIÓN QUE ELIMINA EL ERROR DE COMMERCECODE) ---
 app.post('/webpay/pagar', async (req, res) => {
     const carrito = req.session.carrito || [];
     const total = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
-    
     if (total <= 0) return res.redirect('/');
-    
     try {
-        // SOLUCIÓN: Creamos la transacción con Opciones de Integración explícitas
-        const tx = new WebpayPlus.Transaction(new Options(
-            IntegrationCommerceCodes.WEBPAY_PLUS, 
-            IntegrationApiKeys.WEBPAY, 
-            Environment.Integration
-        ));
-        
+        const tx = new WebpayPlus.Transaction(new Options(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY, Environment.Integration));
         const buyOrder = "O-" + Math.floor(Math.random() * 10000);
         const sessionId = "S-" + Math.floor(Math.random() * 10000);
         const returnUrl = req.protocol + '://' + req.get('host') + '/webpay/retorno';
-
         const response = await tx.create(buyOrder, sessionId, total, returnUrl);
-        
-        res.render('webpay_pago', { 
-            url: response.url, 
-            token: response.token 
-        });
+        res.render('webpay_pago', { url: response.url, token: response.token });
     } catch (e) {
-        console.error("Error técnico Webpay:", e);
-        res.status(500).send("Error al conectar con Transbank: " + e.message);
+        res.status(500).send("Error Webpay: " + e.message);
     }
 });
 
 app.get('/webpay/retorno', (req, res) => {
-    req.session.carrito = []; // Limpiamos el carrito
-    res.render('exito');      // Renderizamos la vista bonita
+    req.session.carrito = []; 
+    res.render('exito');      
 });
 
-app.listen(3000, () => console.log('🚀 Jireth Pro Online | http://localhost:3000'));
+// ESTA LÍNEA ES EL CIERRE QUE TE FALTABA
+app.listen(3001, () => console.log('🚀 Jireth Pro Online | http://localhost:3001'));

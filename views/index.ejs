@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minimarket Jireth | Premium Store</title>
@@ -9,8 +10,72 @@
     <style>
         :root { --primary: #10b981; --dark: #0f172a; --light-bg: #f8fafc; }
         body { background-color: var(--light-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--dark); }
+        
+        /* Navbar Moderna */
         .navbar { background: rgba(255, 255, 255, 0.8) !important; backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
         .navbar-brand { font-weight: 800; letter-spacing: -1px; color: var(--primary) !important; }
+        
+        /* Estilo de las 3 rayitas (Botón Hamburguesa) */
+        .menu-dots {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 10px;
+            outline: none !important;
+        }
+        .menu-dots span {
+            width: 22px;
+            height: 2px;
+            background: var(--dark);
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        /* Menú que cae (Dropdown) */
+        .nav-dropdown {
+            position: absolute;
+            top: 75px;
+            right: 10px;
+            width: 240px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            list-style: none;
+            padding: 12px;
+            display: none; /* Escondido por defecto */
+            z-index: 2000;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-dropdown.show {
+            display: block;
+            animation: slideDown 0.3s ease forwards;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .nav-dropdown li a {
+            text-decoration: none;
+            color: #444;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 12px;
+            transition: 0.2s;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-dropdown li a:hover {
+            background: #f0fdf4;
+            color: var(--primary);
+        }
+        .divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+
+        /* Estilos de Productos */
         .card-product { background: white; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; transition: all 0.4s ease; }
         .card-product:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
         .img-container { height: 220px; overflow: hidden; border-radius: 15px; margin: 10px; }
@@ -24,19 +89,32 @@
 <body>
 
     <nav class="navbar navbar-expand-lg sticky-top py-3">
-        <div class="container">
+        <div class="container position-relative">
             <a class="navbar-brand fs-3" href="/">JIRETH<span class="text-dark">STORE</span></a>
             
             <div class="d-flex align-items-center gap-2">
-                <% if (user) { %>
-                    <span class="me-2 fw-bold text-dark">👋 Hola, <span class="text-success"><%= user %></span></span>
-                    <a href="/logout" class="btn btn-sm btn-outline-danger rounded-pill px-3">Salir</a>
-                <% } else { %>
-                    <a href="/login" class="btn btn-link text-dark text-decoration-none fw-600">Iniciar Sesión</a>
-                    <a href="/registro" class="btn btn-dark rounded-pill px-4 shadow-sm">Registrarse</a>
-                <% } %>
-                
-                <a href="/carrito" class="ms-3 btn btn-light rounded-circle shadow-sm position-relative p-2" style="width: 45px; height: 45px; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                <button id="menu-btn" class="menu-dots me-2">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <ul id="dropdown-menu" class="nav-dropdown">
+                    <% if (user) { %>
+                        <li class="px-3 py-2 small text-muted">Hola, <%= user %></li>
+                        <li><a href="/logout"><i class="fas fa-sign-out-alt text-danger"></i> Cerrar Sesión</a></li>
+                    <% } else { %>
+                        <li><a href="/login"><i class="fas fa-user-circle"></i> Iniciar Sesión</a></li>
+                        <li><a href="/registro"><i class="fas fa-user-plus"></i> Registrarse</a></li>
+                    <% } %>
+                    <li class="divider"></li>
+                    <li><a href="#"><i class="fas fa-fire text-orange"></i> Ofertas del Día</a></li>
+                    <li><a href="https://wa.me/tunúmero" target="_blank"><i class="fab fa-whatsapp text-success"></i> WhatsApp Directo</a></li>
+                    <li><a href="#"><i class="fas fa-th-large"></i> Categorías</a></li>
+                    <li><a href="/admin"><i class="fas fa-lock"></i> Panel Admin</a></li>
+                </ul>
+
+                <a href="/carrito" class="btn btn-light rounded-circle shadow-sm position-relative p-2" style="width: 45px; height: 45px; text-decoration: none; display: flex; align-items: center; justify-content: center;">
                     🛒
                     <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                         <%= cantidad %>
@@ -46,7 +124,7 @@
         </div>
     </nav>
 
-    <main class="container">
+    <main class="container mt-5">
         <div class="row g-4">
             <% productos.forEach(function(prod) { %>
                 <div class="col-sm-6 col-md-4 col-lg-3">
@@ -78,7 +156,7 @@
                     <p>📍 <strong>Dirección:</strong> <%= info.direccion %></p>
                     <p>⏰ <strong>Horario:</strong> <%= info.horario %></p>
                     <p>📞 <strong>Llámanos:</strong> <%= info.telefono %></p>
-                    </div>
+                </div>
                 <div class="col-lg-7">
                     <div class="map-container">
                         <iframe src="<%= info.mapa %>" width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
@@ -92,6 +170,7 @@
     </footer>
 
     <script>
+        // Función para agregar productos al carrito
         function add(id, nombre, precio) {
             fetch('/agregar-al-carrito', {
                 method: 'POST',
@@ -103,6 +182,20 @@
                 document.getElementById('cart-count').innerText = data.cantidad;
             });
         }
+
+        // Lógica del Menú Desplegable
+        const menuBtn = document.getElementById('menu-btn');
+        const dropdown = document.getElementById('dropdown-menu');
+
+        menuBtn.addEventListener('click', (e) => {
+            dropdown.classList.toggle('show');
+            e.stopPropagation();
+        });
+
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('show');
+        });
     </script>
 </body>
 </html>

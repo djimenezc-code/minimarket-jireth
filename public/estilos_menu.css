@@ -1,0 +1,93 @@
+/* VARIABLES GLOBALES */
+:root {
+    --primary: #10b981;
+    --dark: #0f172a;
+    --white: #ffffff;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* NAVBAR AJUSTES */
+.navbar {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+}
+
+/* EL BOTÓN DE LAS 3 RAYAS */
+.menu-dots {
+    background: #f1f5f9;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.menu-dots:hover {
+    background: #e2e8f0;
+}
+
+.menu-dots span {
+    width: 20px;
+    height: 2px;
+    background: var(--dark);
+    border-radius: 10px;
+}
+
+/* EL MENÚ DESPLEGABLE (DROPDOWN) */
+.nav-dropdown {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    width: 250px;
+    background: var(--white);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    list-style: none;
+    padding: 15px;
+    display: none; /* Se activa con JS */
+    z-index: 2000;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.nav-dropdown.show {
+    display: block;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-dropdown li a {
+    text-decoration: none;
+    color: var(--dark);
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 12px;
+    transition: 0.2s;
+    font-weight: 600;
+}
+
+.nav-dropdown li a:hover {
+    background: #ecfdf5;
+    color: var(--primary);
+}
+
+.nav-dropdown i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.divider {
+    height: 1px;
+    background: #f1f5f9;
+    margin: 10px 0;
+}
