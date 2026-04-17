@@ -54,6 +54,8 @@ app.get('/', (req, res) => {
         params = [`%${search}%`, `%${search}%`];
     }
     db.all(query, params, (err, rows) => {
+        // AQUÍ FALTABA EL MANEJO DE ERRORES QUE HABÍAMOS AGREGADO
+        if (err) return res.status(500).send("Error interno de la base de datos.");
         res.render('index', { productos: rows, info: storeInfo });
     });
 });
@@ -135,6 +137,30 @@ app.post('/agregar-al-carrito', (req, res) => {
     else req.session.carrito.push({ id, nombre, precio: parseInt(precio), cantidad: 1 });
     res.json({ cantidad: req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0) });
 });
+
+// --- ¡AQUÍ ESTÁ LA RUTA QUE SE TE HABÍA BORRADO! ---
+app.post('/carrito/update', (req, res) => {
+    const { id, accion } = req.body;
+    if (!req.session.carrito) return res.json({ success: false });
+
+    let carrito = req.session.carrito;
+    const index = carrito.findIndex(p => p.id == id);
+
+    if (index !== -1) {
+        if (accion === 'sumar') {
+            carrito[index].cantidad++;
+        } else if (accion === 'restar') {
+            carrito[index].cantidad--;
+            if (carrito[index].cantidad <= 0) carrito.splice(index, 1);
+        } else if (accion === 'eliminar') {
+            carrito.splice(index, 1);
+        }
+    }
+    
+    req.session.carrito = carrito;
+    res.json({ success: true });
+});
+// ---------------------------------------------------
 
 app.get('/carrito', (req, res) => {
     res.render('carrito', { carrito: req.session.carrito || [] });
