@@ -54,11 +54,12 @@ app.get('/', (req, res) => {
         params = [`%${search}%`, `%${search}%`];
     }
     db.all(query, params, (err, rows) => {
-        // AQUÍ FALTABA EL MANEJO DE ERRORES QUE HABÍAMOS AGREGADO
         if (err) return res.status(500).send("Error interno de la base de datos.");
         res.render('index', { productos: rows, info: storeInfo });
     });
 });
+
+// --- RUTAS DE AUTENTICACIÓN Y REGISTRO ---
 
 // Login de Usuario Normal
 app.get('/login', (req, res) => res.render('login', { error: null }));
@@ -75,6 +76,39 @@ app.post('/login', (req, res) => {
     });
 });
 
+// 1. Mostrar la pantalla de registro
+app.get('/registro', (req, res) => {
+    res.render('registro', { error: null });
+});
+
+// 2. Procesar los datos y guardar al nuevo usuario
+app.post('/registro', (req, res) => {
+    const { nombre, email, password } = req.body;
+
+    // Primero verificamos si el correo ya existe en la base de datos
+    db.get("SELECT * FROM usuarios WHERE email = ?", [email], (err, user) => {
+        if (user) {
+            // Si el correo ya existe, le avisamos
+            return res.render('registro', { error: "Este correo ya está registrado. Intenta iniciar sesión." });
+        }
+
+        // Si no existe, lo guardamos
+        db.run("INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)", 
+        [nombre, email, password], function(err) {
+            if (err) {
+                console.error("Error al registrar:", err);
+                return res.render('registro', { error: "Hubo un problema al crear tu cuenta." });
+            }
+            
+            // Si se registró con éxito, iniciamos su sesión automáticamente
+            req.session.userId = this.lastID; // ID del usuario recién creado
+            req.session.userName = nombre;
+            res.redirect('/'); // Lo mandamos de vuelta a la tienda principal
+        });
+    });
+});
+
+// Cerrar sesión
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
@@ -138,7 +172,7 @@ app.post('/agregar-al-carrito', (req, res) => {
     res.json({ cantidad: req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0) });
 });
 
-// --- ¡AQUÍ ESTÁ LA RUTA QUE SE TE HABÍA BORRADO! ---
+// Ruta para actualizar cantidades en el carrito (sumar, restar, eliminar)
 app.post('/carrito/update', (req, res) => {
     const { id, accion } = req.body;
     if (!req.session.carrito) return res.json({ success: false });
@@ -160,7 +194,6 @@ app.post('/carrito/update', (req, res) => {
     req.session.carrito = carrito;
     res.json({ success: true });
 });
-// ---------------------------------------------------
 
 app.get('/carrito', (req, res) => {
     res.render('carrito', { carrito: req.session.carrito || [] });
