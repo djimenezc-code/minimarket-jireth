@@ -111,21 +111,20 @@
 
         /* 📸 TAMAÑO DE IMAGEN AUMENTADO Y EFECTO HOVER */
         .img-box { 
-            height: 260px; /* Antes 200px */
-            padding: 10px; /* Reducido para dar más espacio a la foto */
+            height: 260px; 
+            padding: 10px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             background: #fff; 
-            overflow: hidden; /* Evita que la foto se salga al hacer zoom */
+            overflow: hidden; 
         }
         .img-box img { 
             max-width: 100%; 
             max-height: 100%; 
             object-fit: contain; 
-            transition: transform 0.4s ease; /* Transición suave */
+            transition: transform 0.4s ease; 
         }
-        /* Efecto zoom al pasar el mouse */
         .product-card:hover .img-box img {
             transform: scale(1.1);
         }
@@ -220,16 +219,23 @@
 
     <main class="container mt-4">
         
-        <!-- HERO SECTION COMPACTO -->
+        <!-- HERO SECTION COMPACTO CON SALUDO -->
         <div class="hero-section">
             <div class="row align-items-center">
                 <div class="col-lg-7">
                     <span class="badge bg-primary mb-2 rounded-pill">Premium Service</span>
-                    <h1 class="mb-2">Tu Minimarket <span class="text-primary">Inteligente</span></h1>
+                    
+                    <!-- 👋 LÍNEAS NUEVAS DE BIENVENIDA -->
+                    <% if (locals.user) { %>
+                        <h3 class="mb-1 text-light fw-normal">¡Hola, <span class="fw-bold text-warning"><%= user %></span>! 👋</h3>
+                    <% } %>
+                    <!-- FIN LÍNEAS NUEVAS -->
+
+                    <h1 class="mb-2 mt-2">Tu Minimarket <span class="text-primary">Inteligente</span></h1>
                     <p class="opacity-75 small mb-4">Compara precios, ahorra con nuestra IA y recibe en casa.</p>
                     
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="#productos" class="hero-btn"><i class="bi bi-cart"></i> Comprar Ahora</a>
+                        <a href="#productos" class="hero-btn"><i class="bi bi-cart3"></i> Comprar Ahora</a>
                         <a href="javascript:void(0)" onclick="openAI()" class="hero-btn border-primary text-primary bg-white"><i class="bi bi-robot"></i> Usar IA de Ahorro Avanzada</a>
                     </div>
                 </div>
