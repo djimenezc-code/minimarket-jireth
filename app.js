@@ -12,6 +12,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ESTA ES LA LÍNEA QUE PERMITE VER TUS IMÁGENES
+// Todo lo que pongas en la carpeta 'public' será accesible desde la raíz '/'
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
@@ -32,7 +35,7 @@ const storeInfo = {
 app.use((req, res, next) => {
     res.locals.cantidad = req.session.carrito ? req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0) : 0;
     res.locals.user = req.session.userName || null;
-    res.locals.isAdmin = req.session.isAdmin || false; // Para saber si es admin en el menú
+    res.locals.isAdmin = req.session.isAdmin || false;
     next();
 });
 
@@ -48,7 +51,7 @@ function protegerAdmin(req, res, next) {
 app.get('/', (req, res) => {
     const search = req.query.search;
     let query = "SELECT * FROM productos";
-    let params = [];
+    let params =[];
     if (search) {
         query += " WHERE nombre LIKE ? OR categoria LIKE ?";
         params = [`%${search}%`, `%${search}%`];
@@ -60,8 +63,6 @@ app.get('/', (req, res) => {
 });
 
 // --- RUTAS DE AUTENTICACIÓN Y REGISTRO ---
-
-// Login de Usuario Normal
 app.get('/login', (req, res) => res.render('login', { error: null }));
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
@@ -76,56 +77,26 @@ app.post('/login', (req, res) => {
     });
 });
 
-// 1. Mostrar la pantalla de registro
-app.get('/registro', (req, res) => {
-    res.render('registro', { error: null });
-});
-
-// 2. Procesar los datos y guardar al nuevo usuario
+app.get('/registro', (req, res) => res.render('registro', { error: null }));
 app.post('/registro', (req, res) => {
     const { nombre, email, password } = req.body;
-
-    // Primero verificamos si el correo ya existe en la base de datos
     db.get("SELECT * FROM usuarios WHERE email = ?", [email], (err, user) => {
-        if (user) {
-            // Si el correo ya existe, le avisamos
-            return res.render('registro', { error: "Este correo ya está registrado. Intenta iniciar sesión." });
-        }
-
-        // Si no existe, lo guardamos
-        db.run("INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)", 
-        [nombre, email, password], function(err) {
-            if (err) {
-                console.error("Error al registrar:", err);
-                return res.render('registro', { error: "Hubo un problema al crear tu cuenta." });
-            }
-            
-            // Si se registró con éxito, iniciamos su sesión automáticamente
-            req.session.userId = this.lastID; // ID del usuario recién creado
+        if (user) return res.render('registro', { error: "Este correo ya está registrado." });
+        db.run("INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)",[nombre, email, password], function(err) {
+            if (err) return res.render('registro', { error: "Error al crear cuenta." });
+            req.session.userId = this.lastID;
             req.session.userName = nombre;
-            res.redirect('/'); // Lo mandamos de vuelta a la tienda principal
+            res.redirect('/');
         });
     });
 });
 
-// Cerrar sesión
-app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
-});
+app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
 
-// --- 4. RUTAS DE ADMINISTRACIÓN (PROTEGIDAS) ---
-
-// Pantalla para poner la clave de admin
-app.get('/admin/login', (req, res) => {
-    res.render('admin_login', { error: null });
-});
-
-// Procesar clave de admin
+// --- 4. RUTAS DE ADMINISTRACIÓN ---
+app.get('/admin/login', (req, res) => res.render('admin_login', { error: null }));
 app.post('/admin/login', (req, res) => {
-    const { user, pass } = req.body;
-    // AQUÍ CONFIGURAS TU CLAVE:
-    if (user === 'admin' && pass === 'jireth2026') { 
+    if (req.body.user === 'admin' && req.body.pass === 'jireth2026') { 
         req.session.isAdmin = true;
         res.redirect('/admin');
     } else {
@@ -133,94 +104,72 @@ app.post('/admin/login', (req, res) => {
     }
 });
 
-// El panel solo abre si 'protegerAdmin' da permiso
 app.get('/admin', protegerAdmin, (req, res) => {
     db.all("SELECT * FROM productos", (err, rows) => {
-        if (err) return res.send("Error al cargar productos");
         res.render('admin', { productos: rows });
     });
 });
 
 app.post('/admin/agregar', protegerAdmin, (req, res) => {
     const { nombre, categoria, precio, stock, imagen } = req.body;
-    db.run("INSERT INTO productos (nombre, categoria, precio, stock, imagen) VALUES (?,?,?,?,?)", 
-    [nombre, categoria, precio, stock, imagen], (err) => {
-        res.redirect('/admin');
-    });
+    db.run("INSERT INTO productos (nombre, categoria, precio, stock, imagen) VALUES (?,?,?,?,?)",[nombre, categoria, precio, stock, imagen], () => res.redirect('/admin'));
 });
 
 app.post('/admin/editar', protegerAdmin, (req, res) => {
     const { id, precio, stock } = req.body;
-    db.run("UPDATE productos SET precio = ?, stock = ? WHERE id = ?", [precio, stock, id], (err) => {
+    db.run("UPDATE productos SET precio = ?, stock = ? WHERE id = ?",[precio, stock, id], (err) => {
         res.json({ success: !err });
     });
 });
 
 app.get('/admin/eliminar/:id', protegerAdmin, (req, res) => {
-    db.run("DELETE FROM productos WHERE id = ?", [req.params.id], (err) => {
-        res.redirect('/admin');
-    });
+    db.run("DELETE FROM productos WHERE id = ?", [req.params.id], () => res.redirect('/admin'));
 });
 
 // --- 5. CARRITO Y WEBPAY ---
 app.post('/agregar-al-carrito', (req, res) => {
     const { id, nombre, precio } = req.body;
-    if (!req.session.carrito) req.session.carrito = [];
+    if (!req.session.carrito) req.session.carrito =[];
     const item = req.session.carrito.find(p => p.id == id);
     if (item) item.cantidad++;
     else req.session.carrito.push({ id, nombre, precio: parseInt(precio), cantidad: 1 });
     res.json({ cantidad: req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0) });
 });
 
-// Ruta para actualizar cantidades en el carrito (sumar, restar, eliminar)
 app.post('/carrito/update', (req, res) => {
     const { id, accion } = req.body;
     if (!req.session.carrito) return res.json({ success: false });
-
     let carrito = req.session.carrito;
     const index = carrito.findIndex(p => p.id == id);
-
     if (index !== -1) {
-        if (accion === 'sumar') {
-            carrito[index].cantidad++;
-        } else if (accion === 'restar') {
+        if (accion === 'sumar') carrito[index].cantidad++;
+        else if (accion === 'restar') {
             carrito[index].cantidad--;
             if (carrito[index].cantidad <= 0) carrito.splice(index, 1);
-        } else if (accion === 'eliminar') {
-            carrito.splice(index, 1);
-        }
+        } else if (accion === 'eliminar') carrito.splice(index, 1);
     }
-    
     req.session.carrito = carrito;
     res.json({ success: true });
 });
 
-app.get('/carrito', (req, res) => {
-    res.render('carrito', { carrito: req.session.carrito || [] });
-});
+app.get('/carrito', (req, res) => res.render('carrito', { carrito: req.session.carrito ||[] }));
 
 app.post('/webpay/pagar', async (req, res) => {
-    const carrito = req.session.carrito || [];
+    const carrito = req.session.carrito ||[];
     const total = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
     if (total <= 0) return res.redirect('/');
     try {
         const tx = new WebpayPlus.Transaction(new Options(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY, Environment.Integration));
-        const buyOrder = "O-" + Math.floor(Math.random() * 10000);
-        const sessionId = "S-" + Math.floor(Math.random() * 10000);
-        const returnUrl = req.protocol + '://' + req.get('host') + '/webpay/retorno';
-        const response = await tx.create(buyOrder, sessionId, total, returnUrl);
+        const response = await tx.create("O-" + Date.now(), "S-" + Date.now(), total, req.protocol + '://' + req.get('host') + '/webpay/retorno');
         res.render('webpay_pago', { url: response.url, token: response.token });
-    } catch (e) {
-        res.status(500).send("Error Webpay: " + e.message);
-    }
+    } catch (e) { res.status(500).send("Error Webpay: " + e.message); }
 });
 
 app.get('/webpay/retorno', (req, res) => {
-    req.session.carrito = []; 
+    req.session.carrito =[]; 
     res.render('exito');      
 });
 
-// --- 6. LANZAMIENTO ---
 app.listen(3001, () => {
     console.log('🚀 Jireth Pro Online | http://localhost:3001');
 });

@@ -5,17 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin Dashboard | Jireth Minimarket</title>
   
-  <!-- Fonts: Inter es la fuente estándar para aplicaciones profesionales -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
     :root {
-      --primary-color: #2563eb;       /* Azul Corporativo */
+      --primary-color: #2563eb;       
       --primary-hover: #1d4ed8;
-      --bg-light: #f8fafc;           /* Fondo gris muy claro */
-      --text-main: #1e293b;          /* Texto Slate oscuro */
+      --bg-light: #f8fafc;           
+      --text-main: #1e293b;          
       --text-muted: #64748b;
       --border-color: #e2e8f0;
       --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -29,183 +28,39 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Navbar Profesional */
-    .navbar {
-      background: #ffffff;
-      border-bottom: 1px solid var(--border-color);
-      padding: 0.75rem 0;
-    }
-    .navbar-brand {
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: var(--primary-color) !important;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .nav-link-custom {
-      color: var(--text-muted);
-      font-weight: 500;
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius);
-      transition: all 0.2s;
-      text-decoration: none;
-      font-size: 0.9rem;
-    }
-    .nav-link-custom:hover {
-      background: #f1f5f9;
-      color: var(--primary-color);
-    }
-    .nav-link-custom.active {
-      background: #eff6ff;
-      color: var(--primary-color);
-    }
+    .navbar { background: #ffffff; border-bottom: 1px solid var(--border-color); padding: 0.75rem 0; }
+    .navbar-brand { font-weight: 700; letter-spacing: -0.5px; color: var(--primary-color) !important; display: flex; align-items: center; gap: 10px; }
+    .nav-link-custom { color: var(--text-muted); font-weight: 500; padding: 0.5rem 1rem; border-radius: var(--radius); transition: all 0.2s; text-decoration: none; font-size: 0.9rem; }
+    .nav-link-custom:hover { background: #f1f5f9; color: var(--primary-color); }
+    .nav-link-custom.active { background: #eff6ff; color: var(--primary-color); }
 
-    /* Header de Página */
-    .page-header {
-      padding: 2rem 0;
-      background: white;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 2rem;
-    }
-    .page-title {
-      font-weight: 700;
-      font-size: 1.75rem;
-      color: var(--text-main);
-    }
+    .page-header { padding: 2rem 0; background: white; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; }
+    .page-title { font-weight: 700; font-size: 1.75rem; color: var(--text-main); }
 
-    /* Stats Cards */
-    .stat-card {
-      background: white;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      transition: transform 0.2s;
-    }
-    .stat-card:hover {
-      box-shadow: var(--card-shadow);
-    }
-    .stat-label {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.025em;
-    }
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-top: 0.25rem;
-      color: var(--text-main);
-    }
-    .stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-    }
+    .stat-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.5rem; transition: transform 0.2s; }
+    .stat-card:hover { box-shadow: var(--card-shadow); }
+    .stat-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; color: var(--text-main); }
+    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
 
-    /* Panel y Tabla */
-    .data-panel {
-      background: white;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      box-shadow: var(--card-shadow);
-      overflow: hidden;
-    }
-    .panel-actions {
-      padding: 1.25rem;
-      border-bottom: 1px solid var(--border-color);
-      background: #fff;
-    }
-    .table thead th {
-      background: #f8fafc;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      padding: 1rem;
-      border-top: none;
-    }
-    .table tbody td {
-      padding: 1rem;
-      vertical-align: middle;
-      border-color: #f1f5f9;
-    }
-    .product-img {
-      width: 44px;
-      height: 44px;
-      border-radius: 6px;
-      object-fit: cover;
-      background: #f1f5f9;
-    }
+    .data-panel { background: white; border: 1px solid var(--border-color); border-radius: var(--radius); box-shadow: var(--card-shadow); overflow: hidden; }
+    .panel-actions { padding: 1.25rem; border-bottom: 1px solid var(--border-color); background: #fff; }
+    .table thead th { background: #f8fafc; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; color: var(--text-muted); padding: 1rem; border-top: none; }
+    .table tbody td { padding: 1rem; vertical-align: middle; border-color: #f1f5f9; }
+    .product-img { width: 44px; height: 44px; border-radius: 6px; object-fit: contain; background: #fff; border: 1px solid #e2e8f0; }
 
-    /* Form Controls */
-    .form-control, .form-select {
-      border: 1px solid var(--border-color);
-      padding: 0.6rem 0.8rem;
-      font-size: 0.9rem;
-    }
-    .form-control:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
+    .form-control, .form-select { border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; font-size: 0.9rem; }
+    .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
-    /* Botones Profesionales */
-    .btn-main {
-      background: var(--primary-color);
-      color: white;
-      font-weight: 500;
-      padding: 0.6rem 1.25rem;
-      border-radius: var(--radius);
-      border: none;
-      transition: background 0.2s;
-    }
-    .btn-main:hover {
-      background: var(--primary-hover);
-      color: white;
-    }
-    .action-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--border-color);
-      background: white;
-      color: var(--text-muted);
-      transition: all 0.2s;
-    }
-    .action-btn:hover {
-      border-color: var(--primary-color);
-      color: var(--primary-color);
-    }
-    .action-btn.delete:hover {
-      border-color: #ef4444;
-      color: #ef4444;
-      background: #fef2f2;
-    }
+    .btn-main { background: var(--primary-color); color: white; font-weight: 500; padding: 0.6rem 1.25rem; border-radius: var(--radius); border: none; transition: background 0.2s; }
+    .btn-main:hover { background: var(--primary-hover); color: white; }
+    .action-btn { width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); background: white; color: var(--text-muted); transition: all 0.2s; }
+    .action-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+    .action-btn.delete:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
 
-    /* Stock Badge */
-    .badge-stock {
-      padding: 0.35em 0.65em;
-      font-weight: 600;
-      border-radius: 6px;
-      font-size: 0.75rem;
-    }
+    .badge-stock { padding: 0.35em 0.65em; font-weight: 600; border-radius: 6px; font-size: 0.75rem; }
 
-    /* Toast Notification */
-    .toast-container {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      z-index: 1060;
-    }
+    .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 1060; }
   </style>
 </head>
 <body>
@@ -218,8 +73,8 @@
         <span>JIRETH <span class="fw-light text-secondary">SYSTEM</span></span>
       </a>
       <div class="d-none d-md-flex gap-2">
-        <a href="/" class="nav-link-custom"><i class="bi bi-arrow-up-right"></i> Tienda</a>
-        <a href="/admin/inventario" class="nav-link-custom active"><i class="bi bi-box-seam"></i> Inventario</a>
+        <a href="/" class="nav-link-custom"><i class="bi bi-arrow-up-right"></i> Ir a Tienda</a>
+        <a href="/admin" class="nav-link-custom active"><i class="bi bi-box-seam"></i> Inventario</a>
         <a href="/logout" class="nav-link-custom"><i class="bi bi-door-open"></i> Cerrar Sesión</a>
       </div>
     </div>
@@ -244,7 +99,6 @@
   </header>
 
   <main class="container mb-5">
-
     <!-- RESUMEN DE MÉTRICAS -->
     <div class="row g-3 mb-4">
       <div class="col-md-3">
@@ -300,13 +154,7 @@
       <div class="panel-actions d-flex flex-column flex-md-row justify-content-between gap-3">
         <div class="position-relative" style="max-width: 400px; flex-grow: 1;">
           <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-          <input id="searchInput" type="text" class="form-control ps-5" placeholder="Buscar por nombre o ID de producto...">
-        </div>
-        <div class="d-flex gap-2">
-          <select class="form-select w-auto">
-            <option>Todas las categorías</option>
-          </select>
-          <button class="btn btn-outline-secondary btn-sm rounded-2"><i class="bi bi-download"></i> Exportar</button>
+          <input id="searchInput" type="text" class="form-control ps-5" placeholder="Buscar por nombre o ID...">
         </div>
       </div>
 
@@ -326,10 +174,23 @@
               <tr data-name="<%= (p.nombre||'').toLowerCase() %>">
                 <td>
                   <div class="d-flex align-items-center gap-3">
-                    <img class="product-img" src="<%= p.imagen || 'https://via.placeholder.com/100?text=IMG' %>" alt="">
+                    <!-- 🛠️ LÓGICA DE IMÁGENES APLICADA AQUÍ TAMBIÉN -->
+                    <% 
+                        let rutaImagen = p.imagen || "";
+                        if (!rutaImagen.startsWith('http')) {
+                            rutaImagen = rutaImagen.replace(/^public\//, '');
+                            rutaImagen = rutaImagen.replace(/^\//, ''); 
+                            if (!rutaImagen.startsWith('images/productos')) {
+                                rutaImagen = '/images/productos/' + rutaImagen;
+                            } else {
+                                rutaImagen = '/' + rutaImagen;
+                            }
+                        }
+                    %>
+                    <img class="product-img" src="<%= rutaImagen %>" onerror="this.src='https://placehold.co/100x100?text=Sin+Foto'">
                     <div>
                       <div class="fw-bold text-dark"><%= p.nombre %></div>
-                      <div class="text-muted" style="font-size: 0.75rem;">ID: #<%= p.id.toString().slice(-5) %></div>
+                      <div class="text-muted" style="font-size: 0.75rem;">ID: #<%= p.id.toString().padStart(4, '0') %></div>
                     </div>
                   </div>
                 </td>
@@ -337,7 +198,7 @@
                 <td>
                   <div class="input-group input-group-sm">
                     <span class="input-group-text">$</span>
-                    <input id="p-<%= p.id %>" type="number" step="0.01" class="form-control" value="<%= p.precio %>">
+                    <input id="p-<%= p.id %>" type="number" class="form-control" value="<%= p.precio %>">
                   </div>
                 </td>
                 <td>
@@ -352,7 +213,7 @@
                 </td>
                 <td class="text-end">
                   <div class="d-flex justify-content-end gap-2">
-                    <button class="action-btn" title="Actualizar" onclick="updateItem('<%= p.id %>')">
+                    <button class="action-btn" title="Guardar Cambios" onclick="updateItem('<%= p.id %>')">
                       <i class="bi bi-floppy-fill"></i>
                     </button>
                     <button class="action-btn delete" title="Eliminar" onclick="deleteItem('<%= p.id %>')">
@@ -368,7 +229,7 @@
     </section>
   </main>
 
-  <!-- MODAL: NUEVO PRODUCTO -->
+  <!-- MODAL: NUEVO PRODUCTO REPARADO (SIN ENCTYPE MULTIPART) -->
   <div class="modal fade" id="nuevoProducto" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow">
@@ -376,7 +237,8 @@
           <h5 class="fw-bold mb-0">Añadir Nuevo Producto al Catálogo</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <form action="/admin/agregar" method="POST" enctype="multipart/form-data">
+        <!-- IMPORTANTE: Se quitó el enctype para que NodeJs pueda leer los datos -->
+        <form action="/admin/agregar" method="POST">
           <div class="modal-body p-4">
             <div class="mb-3">
               <label class="form-label fw-semibold">Nombre del Producto</label>
@@ -387,7 +249,7 @@
                 <label class="form-label fw-semibold">Precio de Venta</label>
                 <div class="input-group">
                   <span class="input-group-text">$</span>
-                  <input name="precio" type="number" step="0.01" class="form-control" required>
+                  <input name="precio" type="number" class="form-control" required>
                 </div>
               </div>
               <div class="col-6">
@@ -405,8 +267,9 @@
               </select>
             </div>
             <div class="mt-3">
-              <label class="form-label fw-semibold">Imagen del Producto</label>
-              <input name="imagen" type="file" accept="image/*" class="form-control">
+              <label class="form-label fw-semibold">Nombre de la Imagen</label>
+              <input name="imagen" type="text" class="form-control" placeholder="Ej: arroz.jpeg" required>
+              <div class="form-text" style="font-size: 0.8rem;">Escribe el nombre exacto de la imagen que arrastraste a la carpeta <b>public/images/productos/</b> en tu VS Code.</div>
             </div>
           </div>
           <div class="modal-footer bg-light">
@@ -455,23 +318,14 @@
       .catch(() => showNotification('Fallo de conexión con el servidor', true));
     }
 
+    // 🛠️ FUNCIÓN DE ELIMINAR REPARADA (Ahora hace la redirección GET correcta)
     function deleteItem(id) {
-      if(!confirm('¿Está seguro de que desea eliminar este producto? Esta acción no se puede deshacer.')) return;
-      
-      fetch('/admin/eliminar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      })
-      .then(r => {
-        if(r.ok) {
-          showNotification('Producto eliminado');
-          setTimeout(() => location.reload(), 800);
-        }
-      });
+      if(confirm('¿Está seguro de que desea eliminar este producto? Esta acción no se puede deshacer.')) {
+        window.location.href = '/admin/eliminar/' + id;
+      }
     }
 
-    // Búsqueda en tiempo real optimizada
+    // Búsqueda en tiempo real
     document.getElementById('searchInput').addEventListener('input', e => {
       const q = e.target.value.toLowerCase();
       const rows = document.querySelectorAll('#productsBody tr');

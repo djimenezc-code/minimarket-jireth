@@ -2,23 +2,183 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>¡Compra Exitosa! | Jireth</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Compra Exitosa! | Jireth Store</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        body { background: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .success-card { background: white; padding: 50px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center; max-width: 500px; }
-        .check-icon { font-size: 80px; color: #10b981; }
+        :root { 
+            --primary: #10b981; 
+            --dark: #0f172a;
+            --bg-gray: #f8fafc;
+        }
+
+        body { 
+            background: radial-gradient(circle at top right, #ecfeff, #f8fafc);
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .success-container {
+            background: white;
+            width: 100%;
+            max-width: 550px;
+            border-radius: 32px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.1);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Icono de Check Animado */
+        .success-icon-wrapper {
+            width: 100px;
+            height: 100px;
+            background: #f0fdf4;
+            color: var(--primary);
+            font-size: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            position: relative;
+        }
+
+        .success-icon-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .order-badge {
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 { font-weight: 800; letter-spacing: -1px; color: var(--dark); margin-bottom: 1rem; }
+        p { color: #64748b; line-height: 1.6; }
+
+        .receipt-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 2rem 0;
+            border: 1px dashed #cbd5e1;
+            text-align: left;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-home {
+            background: var(--dark);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 16px 32px;
+            font-weight: 700;
+            width: 100%;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .btn-home:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+            color: white;
+        }
+
+        .btn-whatsapp {
+            color: #16a34a;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 1.5rem;
+        }
     </style>
 </head>
 <body>
-    <div class="success-card">
-        <div class="check-icon">✅</div>
-        <h1 class="fw-bold mt-3">¡Pago Confirmado!</h1>
-        <p class="text-muted fs-5">Gracias por tu compra. Hemos recibido tu pedido y estamos preparando todo para ti.</p>
-        <hr class="my-4 opacity-50">
-        <p class="small text-muted mb-4">Se ha enviado un comprobante a tu correo registrado.</p>
-        <a href="/" class="btn btn-dark rounded-pill px-5 py-3 fw-bold shadow">Volver al Inicio</a>
+
+    <div class="success-container">
+        <!-- Brand Small Logo -->
+        <div class="mb-4 small fw-800 text-primary opacity-50">JIRETH STORE</div>
+
+        <div class="success-icon-wrapper">
+            <i class="bi bi-check-lg"></i>
+        </div>
+
+        <div class="order-badge">
+            <i class="bi bi-receipt me-1"></i> Transacción Aprobada
+        </div>
+
+        <h1>¡Pago Confirmado!</h1>
+        <p>Gracias por preferir Minimarket Jireth. Hemos recibido tu pedido correctamente y ya estamos preparando todo para ti.</p>
+
+        <!-- Detalle visual (Simulado o con datos reales si los pasas) -->
+        <div class="receipt-card">
+            <div class="receipt-item">
+                <span class="text-muted">Método de pago</span>
+                <span class="fw-bold">Webpay Plus</span>
+            </div>
+            <div class="receipt-item">
+                <span class="text-muted">Estado</span>
+                <span class="badge bg-success-subtle text-success">Completado</span>
+            </div>
+            <div class="receipt-item border-top mt-2 pt-2 fw-bold text-dark">
+                <span>Fecha</span>
+                <span><%= new Date().toLocaleDateString('es-CL') %></span>
+            </div>
+        </div>
+
+        <a href="/" class="btn-home">
+            Volver a la Tienda <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+
+        <a href="https://wa.me/56948539049" target="_blank" class="btn-whatsapp">
+            <i class="fab fa-whatsapp fs-5"></i> ¿Tienes dudas? Escríbenos
+        </a>
+
+        <p class="mt-4 small opacity-50">Se ha enviado un comprobante detallado a tu email.</p>
     </div>
+
 </body>
 </html>
