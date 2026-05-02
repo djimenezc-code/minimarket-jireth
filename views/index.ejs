@@ -7,12 +7,14 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root { 
-            --primary: #10b981; /* Verde Esmeralda */
+            --primary: #10b981; 
             --dark: #0f172a;
+            --light-bg: #f8fafc;
         }
 
         body { 
@@ -21,163 +23,230 @@
             color: var(--dark); 
         }
 
-        /* Navbar Superior */
+        /* NAVBAR GLASSMORPHISM */
         .navbar { 
-            background: rgba(255, 255, 255, 0.9); 
+            background: rgba(255, 255, 255, 0.85); 
             backdrop-filter: blur(12px); 
-            border-bottom: 2px solid var(--primary);
-            padding: 15px 0;
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+            padding: 10px 0;
         }
 
-        .navbar-brand { color: var(--primary); }
+        .navbar-brand img { height: 40px; } /* Ajuste para tu logo local */
 
-        /* Botón de Menú (3 rayas) */
-        .menu-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            padding: 10px;
-        }
-
-        .menu-btn span {
-            width: 25px;
-            height: 3px;
-            background: var(--dark);
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-
-        /* Lista Desplegable */
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 20px;
-            top: 70px;
-            background: white;
-            min-width: 200px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-radius: 15px;
-            z-index: 1000;
+        /* HERO COMPACTO E INTERACTIVO */
+        .hero-section {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 24px;
+            padding: 30px 40px; /* Reducido de 60px a 30px */
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
         }
 
-        .dropdown-content.show { display: block; animation: fadeIn 0.3s; }
+        .hero-section h1 { font-size: 1.8rem; font-weight: 800; }
 
-        .dropdown-content a {
-            color: var(--dark);
-            padding: 12px 20px;
+        /* Botones del Hero */
+        .hero-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: 0.3s;
             text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .hero-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* BURBUJA DE WHATSAPP */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #25d366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 10px;
-            transition: 0.2s;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3);
+            z-index: 2000;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+        .whatsapp-float:hover {
+            transform: scale(1.1) rotate(10deg);
+            color: white;
+        }
+        .whatsapp-float::before { /* Efecto de pulso */
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            background: #25d366;
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse-green 2s infinite;
         }
 
-        .dropdown-content a:hover { background: #f0fdf4; color: var(--primary); }
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
 
-        /* Tarjetas de Productos */
+        /* TARJETAS DE PRODUCTO */
         .product-card {
             background: white;
             border-radius: 20px;
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.04);
             transition: 0.3s;
             overflow: hidden;
         }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
 
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-
-        .img-box { height: 200px; background: #eee; }
-        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .img-box { height: 180px; padding: 10px; background: #fff; display: flex; align-items: center; justify-content: center; }
+        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
         .btn-add {
-            background: var(--dark);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 8px 15px;
-            font-weight: 600;
+            background: var(--dark); color: white; border: none;
+            border-radius: 12px; padding: 10px; font-weight: 700; width: 100%; transition: 0.3s;
         }
-
         .btn-add:hover { background: var(--primary); }
+
+        /* DROPDOWN MENU */
+        .dropdown-content {
+            display: none; position: absolute; right: 0; top: 50px;
+            background: white; min-width: 200px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000; overflow: hidden;
+        }
+        .dropdown-content.show { display: block; animation: fadeIn 0.3s; }
+        .dropdown-content a { color: var(--dark); padding: 12px 20px; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-content a:hover { background: #f0fdf4; color: var(--primary); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <body>
 
+    <!-- BURBUJA WHATSAPP -->
+    <a href="https://wa.me/56948539049" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- NAVBAR -->
     <nav class="navbar sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand" href="/">JIRETH<span class="text-dark">STORE</span></a>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <!-- Imagen local de tu carpeta public -->
+                <img src="/logo.png" onerror="this.style.display='none'"> 
+                <span class="fw-800 text-primary">JIRETH<span class="text-dark">STORE</span></span>
+            </a>
             
             <div class="d-flex align-items-center gap-3">
-                <a href="/carrito" class="text-dark text-decoration-none position-relative">
-                    <span style="font-size: 1.5rem;">🛒</span>
-                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                <a href="/carrito" class="text-dark text-decoration-none position-relative p-2 bg-light rounded-circle">
+                    <i class="bi bi-cart3 fs-5"></i>
+                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
                         <%= cantidad %>
                     </span>
                 </a>
 
                 <div class="position-relative">
-                    <button class="menu-btn" onclick="toggleMenu()">
-                        <span></span><span></span><span></span>
+                    <button class="border-0 bg-transparent" onclick="toggleMenu()">
+                        <i class="bi bi-grid-fill fs-4 text-dark"></i>
                     </button>
                     <div id="myDropdown" class="dropdown-content">
-                        <% if (user) { %>
-                            <a href="#"><i class="fas fa-user"></i> Hola, <%= user %></a>
+                        <% if (locals.user) { %>
+                            <a href="#"><i class="fas fa-user"></i> <%= user %></a>
                             <a href="/logout"><i class="fas fa-sign-out-alt"></i> Salir</a>
                         <% } else { %>
                             <a href="/login"><i class="fas fa-sign-in-alt"></i> Ingresar</a>
                         <% } %>
                         <a href="/admin"><i class="fas fa-lock"></i> Admin</a>
-                        <a href="https://wa.me/56948539049" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="container mt-5">
-        <div class="row g-4">
+    <main class="container mt-4">
+        
+        <!-- HERO COMPACTO -->
+        <div class="hero-section">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="mb-2">Jireth <span class="text-primary">Online</span></h1>
+                    <p class="opacity-75 small mb-3">Calidad y ahorro para tu hogar en Talagante.</p>
+                    
+                    <!-- Botones interactivos del Hero -->
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="#productos" class="hero-btn">
+                            <i class="bi bi-shop"></i> Ver Productos
+                        </a>
+                        <a href="https://wa.me/56948539049" class="hero-btn">
+                            <i class="bi bi-chat-dots"></i> Pedir por WA
+                        </a>
+                        <a href="#mapa" class="hero-btn">
+                            <i class="bi bi-geo-alt"></i> Ubicación
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LISTADO DE PRODUCTOS -->
+        <div id="productos" class="row g-3 mb-5">
             <% productos.forEach(function(prod) { %>
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="product-card h-100 d-flex flex-column">
                         <div class="img-box">
-                            <img src="<%= prod.imagen %>" onerror="this.src='https://placehold.co/400x400?text=Jireth+Store'">
+                            <!-- Usa la ruta de imagen que ya tienes o cámbiala a una local si prefieres -->
+                            <img src="<%= prod.imagen %>" onerror="this.src='/img/placeholder.png'">
                         </div>
                         <div class="p-3 mt-auto text-center">
-                            <h6 class="fw-bold mb-1"><%= prod.nombre %></h6>
-                            <p class="text-primary fw-bold mb-2">$<%= prod.precio %></p>
-                            <button class="btn-add w-100" onclick="add('<%= prod.id %>', '<%= prod.nombre %>', '<%= prod.precio %>')">
-                                Agregar +
+                            <h6 class="fw-bold mb-1" style="font-size: 0.9rem;"><%= prod.nombre %></h6>
+                            <p class="text-primary fw-800 mb-2">$<%= Number(prod.precio).toLocaleString('es-CL') %></p>
+                            <button class="btn-add" onclick="add('<%= prod.id %>', '<%= prod.nombre %>', '<%= prod.precio %>')">
+                                <i class="bi bi-plus-lg"></i> Agregar
                             </button>
                         </div>
                     </div>
                 </div>
             <% }); %>
         </div>
+
+        <!-- SECCIÓN MAPA -->
+        <div id="mapa" class="bg-white rounded-4 overflow-hidden border mb-5 shadow-sm">
+            <div class="row g-0">
+                <div class="col-md-4 p-4 d-flex flex-column justify-content-center">
+                    <h5 class="fw-800 mb-3">Encuéntranos</h5>
+                    <p class="text-muted small"><i class="bi bi-geo-alt-fill text-danger"></i> Av San Martin, Talagante</p>
+                    <a href="https://maps.google.com/?q=Av+San+Martin,+Talagante" target="_blank" class="btn btn-outline-dark btn-sm rounded-3">Ver en Google Maps</a>
+                </div>
+                <div class="col-md-8" style="height: 250px;">
+                    <iframe src="https://www.google.com/maps/embed?..." width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
         function toggleMenu() {
             document.getElementById("myDropdown").classList.toggle("show");
-        }
-
-        // Cerrar menú si el usuario hace clic fuera
-        window.onclick = function(event) {
-            if (!event.target.matches('.menu-btn') && !event.target.matches('.menu-btn span')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
         }
 
         function add(id, nombre, precio) {
@@ -188,71 +257,20 @@
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('cart-count').innerText = data.cantidad;
+                const cartCount = document.getElementById('cart-count');
+                cartCount.innerText = data.cantidad;
+                // Pequeño efecto visual al agregar
+                cartCount.style.transform = "scale(1.5)";
+                setTimeout(() => cartCount.style.transform = "scale(1)", 200);
             });
         }
+
+        // Cerrar menú al hacer clic fuera
+        window.onclick = function(event) {
+            if (!event.target.closest('.position-relative')) {
+                document.getElementById("myDropdown").classList.remove('show');
+            }
+        }
     </script>
-    <div class="container my-5 p-4 p-md-5 bg-white rounded-4 shadow-sm border">
-    <div class="row align-items-center">
-        
-        <div class="col-md-6 mb-4 mb-md-0 pe-md-5">
-            <span class="badge bg-success mb-2 px-3 py-2 rounded-pill">Visítanos</span>
-            <h2 class="fw-extrabold mb-3" style="color: #1e293b;">
-                ¡Descubre la calidad y el ahorro que tu familia merece!
-            </h2>
-            <p class="fs-5 text-muted mb-4">
-                En <strong>Minimarket Jireth</strong> trabajamos todos los días para ofrecerte los productos más frescos y al mejor precio. ¡Ven a conocernos, te esperamos con la atención más amable de Talagante!
-            </p>
-            
-            <div class="d-flex align-items-center mb-3">
-                <div class="bg-light rounded-circle p-3 me-3 d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                    <i class="fas fa-map-marker-alt fs-4 text-danger"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0 text-uppercase text-muted" style="font-size: 0.8rem;">Nuestra Dirección</h6>
-                    <p class="mb-0 fs-5 fw-semibold">Av San Martin, Talagante</p>
-                </div>
-            </div>
-
-            <div class="d-flex align-items-center">
-                <div class="bg-light rounded-circle p-3 me-3 d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                    <i class="fab fa-whatsapp fs-4 text-success"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0 text-uppercase text-muted" style="font-size: 0.8rem;">Contáctanos</h6>
-                    <p class="mb-0 fs-5 fw-semibold">+56 9 48 539049</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <a href="https://maps.google.com/?q=Av+San+Martin,+Talagante" target="_blank" class="text-decoration-none">
-                <div class="position-relative rounded-4 overflow-hidden shadow" style="height: 350px; background-color: #e9ecef;">
-                    
-                    <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3324.00000000000!2d-70.932824!3d-33.665809!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAv.%20San%20Mart%C3%ADn%2C%20Talagante!5e0!3m2!1ses-419!2scl!4v1600000000000!5m2!1ses-419!2scl" 
-                        width="100%" 
-                        height="100%" 
-                        style="border:0; pointer-events: none;" 
-                        allowfullscreen="" 
-                        loading="lazy">
-                    </iframe>
-
-                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
-                    style="background: rgba(0,0,0,0.15); transition: background 0.3s;" 
-                    onmouseover="this.style.background='rgba(0,0,0,0.4)'" 
-                    onmouseout="this.style.background='rgba(0,0,0,0.15)'">
-                        
-                        <span class="btn btn-light btn-lg rounded-pill shadow-lg fw-bold text-success px-4">
-                            <i class="fas fa-external-link-alt me-2"></i> Abrir en Google Maps
-                        </span>
-                        
-                    </>
-                </div>
-            </a>
-        </div>
-
-    </div>
-</div>
 </body>
 </html>
