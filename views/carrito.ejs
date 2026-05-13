@@ -1,253 +1,141 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Carrito | Jireth Store</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mi Carrito | Jireth Store</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <style>
+            :root { --primary: #10b981; --dark: #0f172a; --light-bg: #f8fafc; }
+            body { background-color: var(--light-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--dark); }
+            .page-title { font-weight: 800; letter-spacing: -1px; }
+            .cart-card { background: white; border-radius: 24px; border: 1px solid rgba(0,0,0,0.05); padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+            .product-row { border-bottom: 1px solid #f1f5f9; padding: 15px 0; transition: 0.3s; }
+            .product-row:last-child { border-bottom: none; }
+            .qty-control { background: #f1f5f9; border-radius: 12px; display: inline-flex; align-items: center; padding: 4px; }
+            .qty-btn { width: 32px; height: 32px; border-radius: 10px; border: none; background: white; display: flex; align-items: center; justify-content: center; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            .qty-btn:hover { background: var(--primary); color: white; }
+            .summary-card { background: var(--dark); color: white; border-radius: 24px; padding: 30px; position: sticky; top: 100px; }
+            .btn-pay { background: var(--primary); color: white; border: none; border-radius: 16px; padding: 16px; font-weight: 700; width: 100%; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px; }
+            .btn-pay:hover { background: #059669; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); color: white; }
+            .empty-cart-icon { font-size: 4rem; color: #cbd5e1; margin-bottom: 20px; }
+            .back-link { text-decoration: none; color: var(--dark); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+            .back-link:hover { color: var(--primary); }
+            .img-thumb { width: 60px; height: 60px; object-fit: contain; border-radius: 12px; background: #f8fafc; border: 1px solid #eee; }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar py-3">
+            <div class="container">
+                <a class="navbar-brand fw-800 text-primary" href="/">JIRETH<span class="text-dark">STORE</span></a>
+                <a href="/" class="back-link"><i class="bi bi-arrow-left"></i> Seguir comprando</a>
+            </div>
+        </nav>
 
-    <style>
-        :root { 
-            --primary: #10b981; 
-            --dark: #0f172a;
-            --light-bg: #f8fafc;
-        }
-
-        body { 
-            background-color: var(--light-bg); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: var(--dark); 
-        }
-
-        /* Títulos */
-        .page-title { font-weight: 800; letter-spacing: -1px; }
-
-        /* Contenedor principal de items */
-        .cart-card {
-            background: white;
-            border-radius: 24px;
-            border: 1px solid rgba(0,0,0,0.05);
-            padding: 25px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
-
-        /* Estilo de cada producto en la tabla */
-        .product-row {
-            border-bottom: 1px solid #f1f5f9;
-            padding: 15px 0;
-            transition: 0.3s;
-        }
-        .product-row:last-child { border-bottom: none; }
-
-        /* Controles de cantidad */
-        .qty-control {
-            background: #f1f5f9;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            padding: 4px;
-        }
-        .qty-btn {
-            width: 32px; height: 32px;
-            border-radius: 10px;
-            border: none;
-            background: white;
-            display: flex; align-items: center; justify-content: center;
-            transition: 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .qty-btn:hover { background: var(--primary); color: white; }
-
-        /* Resumen de Pago (Barra lateral) */
-        .summary-card {
-            background: var(--dark);
-            color: white;
-            border-radius: 24px;
-            padding: 30px;
-            position: sticky;
-            top: 100px;
-        }
-
-        .btn-pay {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            padding: 16px;
-            font-weight: 700;
-            width: 100%;
-            transition: 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        .btn-pay:hover { 
-            background: #059669; 
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
-            color: white;
-        }
-
-        /* Empty State */
-        .empty-cart-icon {
-            font-size: 4rem;
-            color: #cbd5e1;
-            margin-bottom: 20px;
-        }
-
-        .back-link {
-            text-decoration: none;
-            color: var(--dark);
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
-        }
-        .back-link:hover { color: var(--primary); }
-
-        .img-thumb {
-            width: 60px; height: 60px;
-            object-fit: cover;
-            border-radius: 12px;
-            background: #f8fafc;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- NAVBAR SIMPLIFICADO -->
-    <nav class="navbar py-3">
-        <div class="container">
-            <a class="navbar-brand fw-800 text-primary" href="/">JIRETH<span class="text-dark">STORE</span></a>
-            <a href="/" class="back-link"><i class="bi bi-arrow-left"></i> Seguir comprando</a>
-        </div>
-    </nav>
-
-    <div class="container mt-4 mb-5">
-        <h2 class="page-title mb-4">Mi Carrito</h2>
-
-        <% if (carrito.length > 0) { %>
-            <div class="row g-4">
-                
-                <!-- LISTA DE PRODUCTOS -->
-                <div class="col-lg-8">
-                    <div class="cart-card">
-                        <div class="d-none d-md-flex row border-bottom pb-3 mb-3 text-muted fw-bold small">
-                            <div class="col-md-6">PRODUCTO</div>
-                            <div class="col-md-2 text-center">CANTIDAD</div>
-                            <div class="col-md-2 text-end">SUBTOTAL</div>
-                            <div class="col-md-2 text-end">ACCIÓN</div>
-                        </div>
-
-                        <% let total = 0; %>
-                        <% carrito.forEach(item => { 
-                            let subtotal = item.precio * item.cantidad;
-                            total += subtotal;
-                        %>
-                            <div class="product-row row align-items-center">
-                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <!-- Imagen de producto (asumiendo que item.id o item.imagen existe) -->
-                                        <img src="<%= item.imagen || '/img/placeholder.png' %>" class="img-thumb" onerror="this.src='https://placehold.co/100x100?text=Prod'">
-                                        <div>
-                                            <div class="fw-bold"><%= item.nombre %></div>
-                                            <div class="text-muted small">$<%= Number(item.precio).toLocaleString('es-CL') %> c/u</div>
+        <div class="container mt-4 mb-5">
+            <h2 class="page-title mb-4">Mi Carrito</h2>
+            <% if (carrito.length > 0) { %>
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="cart-card">
+                            <div class="d-none d-md-flex row border-bottom pb-3 mb-3 text-muted fw-bold small">
+                                <div class="col-md-6">PRODUCTO</div>
+                                <div class="col-md-2 text-center">CANTIDAD</div>
+                                <div class="col-md-2 text-end">SUBTOTAL</div>
+                                <div class="col-md-2 text-end">ACCIÓN</div>
+                            </div>
+                            <% let total = 0; %>
+                            <% carrito.forEach(item => { 
+                                let subtotal = item.precio * item.cantidad;
+                                total += subtotal;
+                            %>
+                                <div class="product-row row align-items-center">
+                                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <!-- MODIFICACIÓN: Lógica de limpieza de ruta para la imagen -->
+                                            <% 
+                                                let imgPath = item.imagen || "";
+                                                if (!imgPath.startsWith('http')) {
+                                                    imgPath = imgPath.replace(/^public\//, '').replace(/\\/g, '/').replace(/^\//, '');
+                                                    if (!imgPath.startsWith('images/productos/')) {
+                                                        imgPath = '/images/productos/' + imgPath;
+                                                    } else {
+                                                        imgPath = '/' + imgPath;
+                                                    }
+                                                }
+                                            %>
+                                            <img src="<%= imgPath %>" class="img-thumb" onerror="this.src='https://placehold.co/100x100?text=Prod'">
+                                            <div>
+                                                <div class="fw-bold"><%= item.nombre %></div>
+                                                <div class="text-muted small">$<%= Number(item.precio).toLocaleString('es-CL') %> c/u</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <div class="col-5 col-md-2 text-center">
-                                    <div class="qty-control">
-                                        <button class="qty-btn" onclick="updateQty('<%= item.id %>', 'restar')"><i class="bi bi-dash"></i></button>
-                                        <span class="px-3 fw-bold"><%= item.cantidad %></span>
-                                        <button class="qty-btn" onclick="updateQty('<%= item.id %>', 'sumar')"><i class="bi bi-plus"></i></button>
+                                    <div class="col-5 col-md-2 text-center">
+                                        <div class="qty-control">
+                                            <button class="qty-btn" onclick="updateQty('<%= item.id %>', 'restar')"><i class="bi bi-dash"></i></button>
+                                            <span class="px-3 fw-bold"><%= item.cantidad %></span>
+                                            <button class="qty-btn" onclick="updateQty('<%= item.id %>', 'sumar')"><i class="bi bi-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-5 col-md-2 text-end">
+                                        <span class="fw-800 text-primary">$<%= subtotal.toLocaleString('es-CL') %></span>
+                                    </div>
+                                    <div class="col-2 col-md-2 text-end">
+                                        <button class="btn btn-light btn-sm rounded-circle text-danger" onclick="updateQty('<%= item.id %>', 'eliminar')">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div class="col-5 col-md-2 text-end">
-                                    <span class="fw-800 text-primary">$<%= subtotal.toLocaleString('es-CL') %></span>
-                                </div>
-
-                                <div class="col-2 col-md-2 text-end">
-                                    <button class="btn btn-light btn-sm rounded-circle text-danger" onclick="updateQty('<%= item.id %>', 'eliminar')" title="Eliminar">
-                                        <i class="bi bi-trash3"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        <% }) %>
+                            <% }) %>
+                        </div>
                     </div>
-                </div>
-
-                <!-- RESUMEN DE PAGO -->
-                <div class="col-lg-4">
-                    <div class="summary-card">
-                        <h4 class="fw-bold mb-4">Resumen de compra</h4>
-                        
-                        <div class="d-flex justify-content-between mb-2 opacity-75">
-                            <span>Subtotal</span>
-                            <span>$<%= total.toLocaleString('es-CL') %></span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3 opacity-75">
-                            <span>Envío</span>
-                            <span class="text-success fw-bold">Gratis</span>
-                        </div>
-                        
-                        <hr class="opacity-25">
-                        
-                        <div class="d-flex justify-content-between align-items-end mb-4">
-                            <span class="fs-5">Total</span>
-                            <span class="fs-2 fw-800 text-primary">$<%= total.toLocaleString('es-CL') %></span>
-                        </div>
-
-                        <form action="/webpay/pagar" method="POST">
-                            <button type="submit" class="btn-pay">
-                                <span>Pagar ahora</span>
-                                <i class="bi bi-shield-check fs-4"></i>
-                            </button>
-                        </form>
-
-                        <div class="mt-4 p-3 rounded-4 bg-white bg-opacity-10 text-center">
-                            <div class="small opacity-75 mb-2">Aceptamos</div>
-                            <div class="d-flex justify-content-center gap-3 fs-3 opacity-50">
-                                <i class="bi bi-credit-card"></i>
-                                <i class="bi bi-bank"></i>
-                                <i class="bi bi-wallet2"></i>
+                    <div class="col-lg-4">
+                        <div class="summary-card">
+                            <h4 class="fw-bold mb-4">Resumen de compra</h4>
+                            <div class="d-flex justify-content-between mb-2 opacity-75">
+                                <span>Subtotal</span>
+                                <span>$<%= total.toLocaleString('es-CL') %></span>
                             </div>
+                            <div class="d-flex justify-content-between mb-3 opacity-75">
+                                <span>Envío</span>
+                                <span class="text-success fw-bold">Gratis</span>
+                            </div>
+                            <hr class="opacity-25">
+                            <div class="d-flex justify-content-between align-items-end mb-4">
+                                <span class="fs-5">Total</span>
+                                <span class="fs-2 fw-800 text-primary">$<%= total.toLocaleString('es-CL') %></span>
+                            </div>
+                            <form action="/webpay/pagar" method="POST">
+                                <button type="submit" class="btn-pay">
+                                    <span>Pagar ahora</span>
+                                    <i class="bi bi-shield-check fs-4"></i>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
-
-            </div>
-        <% } else { %>
-            <!-- ESTADO VACÍO -->
-            <div class="cart-card text-center py-5">
-                <i class="bi bi-cart-x empty-cart-icon d-block"></i>
-                <h3 class="fw-bold">Tu carrito está vacío</h3>
-                <p class="text-muted mb-4">¡Parece que aún no has agregado productos a tu compra!</p>
-                <a href="/" class="btn btn-dark px-5 py-3 rounded-pill fw-bold">Ir a la tienda</a>
-            </div>
-        <% } %>
-    </div>
-
-    <script>
-        function updateQty(id, accion) {
-            fetch('/carrito/update', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id, accion })
-            }).then(() => {
-                // Pequeña animación antes de recargar
-                document.body.style.opacity = '0.5';
-                location.reload();
-            });
-        }
-    </script>
-
-</body>
-</html>
+            <% } else { %>
+                <div class="cart-card text-center py-5">
+                    <i class="bi bi-cart-x empty-cart-icon d-block"></i>
+                    <h3 class="fw-bold">Tu carrito está vacío</h3>
+                    <a href="/" class="btn btn-dark px-5 py-3 rounded-pill fw-bold">Ir a la tienda</a>
+                </div>
+            <% } %>
+        </div>
+        <script>
+            function updateQty(id, accion) {
+                fetch('/carrito/update', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id, accion })
+                }).then(() => {
+                    location.reload();
+                });
+            }
+        </script>
+    </body>
+    </html>

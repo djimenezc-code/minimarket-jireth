@@ -1,0 +1,46 @@
+/* VARIABLES DE COLOR */
+:root {
+  --primary: #b9ae10; /* Verde principal */
+  --primary-hover: #8c9605;
+  --dark: #0f172a; /* Azul muy oscuro para textos y botones */
+  --light-bg: #f8fafc; /* Fondo gris casi blanco */
+  --white: #ffffff;
+}
+
+/* Aplicación de colores al cuerpo */
+body {
+  background-color: var(--light-bg) !important;
+  color: var(--dark);
+}
+
+/* Color de la barra de navegación */
+.navbar {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-bottom: 2px solid var(--primary) !important; /* Línea verde abajo */
+}
+
+/* Color del logo */
+.navbar-brand {
+  color: var(--primary) !important;
+  font-weight: 800;
+}
+
+/* Botones de agregar (+) */
+.btn-add {
+  background-color: var(--dark) !important;
+  color: white !important;
+  border: none;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.btn-add:hover {
+  background-color: var(--primary) !important;
+  transform: scale(1.1);
+}
+
+/* Tarjetas de productos */
+.card-product {
+  background: var(--white);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}

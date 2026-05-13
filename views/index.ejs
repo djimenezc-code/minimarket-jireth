@@ -1,311 +1,165 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimarket Jireth | Premium Store</title>
-    
-    <!-- Iconos y Fuentes -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-
-    <style>
-        :root { 
-            --primary: #10b981; 
-            --dark: #0f172a;
-            --light-bg: #f8fafc;
-        }
-
-        body { 
-            background-color: var(--light-bg); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: var(--dark); 
-            overflow-x: hidden;
-        }
-
-        /* NAVBAR GLASSMORPHISM */
-        .navbar { 
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(12px); 
-            border-bottom: 1px solid rgba(16, 185, 129, 0.1);
-            padding: 12px 0;
-        }
-
-        /* HERO COMPACTO */
-        .hero-section {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border-radius: 28px;
-            padding: 35px;
-            color: white;
-            margin-bottom: 30px;
-            position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-
-        .hero-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 14px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-        .hero-btn:hover { background: var(--primary); transform: translateY(-3px); color: white; }
-
-
-
-        /* WHATSAPP FLOAT */
-        .whatsapp-float {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background-color: #25d366;
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            box-shadow: 0 10px 25px rgba(37,211,102,0.3);
-            z-index: 2000;
-            text-decoration: none;
-        }
-
-        /* TARJETAS DE PRODUCTO MEJORADAS */
-        .product-card {
-            background: white;
-            border-radius: 24px;
-            border: 1px solid rgba(0,0,0,0.03);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            overflow: hidden;
-            height: 100%;
-        }
-        .product-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
-        /* 📸 TAMAÑO DE IMAGEN AUMENTADO Y EFECTO HOVER */
-        .img-box { 
-            height: 260px; 
-            padding: 10px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: #fff; 
-            overflow: hidden; 
-        }
-        .img-box img { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; 
-            transition: transform 0.4s ease; 
-        }
-        .product-card:hover .img-box img {
-            transform: scale(1.1);
-        }
-
-        .btn-add {
-            background: var(--dark); color: white; border: none;
-            border-radius: 14px; padding: 12px; font-weight: 700; width: 100%;
-            transition: 0.3s;
-        }
-        .btn-add:hover { background: var(--primary); }
-
-
-
-        /* MAPA */
-        .map-container {
-            border-radius: 28px;
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
-        }
-
-        .dropdown-content {
-            display: none; position: absolute; right: 0; top: 55px;
-            background: white; min-width: 220px; border-radius: 18px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); z-index: 1000; overflow: hidden;
-        }
-        .dropdown-content.show { display: block; animation: fadeIn 0.3s; }
-        .dropdown-content a { color: var(--dark); padding: 14px 20px; text-decoration: none; display: flex; align-items: center; gap: 12px; }
-        .dropdown-content a:hover { background: #f0fdf4; color: var(--primary); }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body>
-
-
-
-    <!-- WHATSAPP BOTÓN -->
-    <a href="https://wa.me/56948539049" class="whatsapp-float" target="_blank">
-        <i class="fab fa-whatsapp"></i>
-    </a>
-
-    <!-- NAVBAR -->
-    <nav class="navbar sticky-top">
-        <div class="container d-flex justify-content-between align-items-center">
-            
-            <!-- 🚀 DISEÑO DE LOGO MODERNO -->
-            <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="/">
-                <img src="/logo.png" height="42" onerror="this.src='https://placehold.co/42x42?text=J'" class="rounded-3 shadow-sm"> 
-                <span class="mb-0" style="font-size: 1.6rem; letter-spacing: -0.5px;">
-                    <span class="fw-800 text-primary">JIRETH</span><span class="fw-light text-dark ms-1">STORE</span>
-                </span>
-            </a>
-            
-            <div class="d-flex align-items-center gap-3">
-                <!-- 🛒 ICONO DE CARRITO DE SUPERMERCADO -->
-                <a href="/carrito" class="text-dark text-decoration-none position-relative p-2 bg-light border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; transition: 0.3s;" onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
-                    <i class="bi bi-cart3 fs-5"></i>
-                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm" style="font-size: 0.65rem; border: 2px solid white;">
-                        <%= cantidad %>
-                    </span>
-                </a>
-
-                <div class="position-relative">
-                    <button class="border-0 bg-transparent d-flex align-items-center justify-content-center p-2 rounded-circle hover-bg-light" style="width: 45px; height: 45px; transition: 0.3s;" onclick="toggleMenu()">
-                        <i class="bi bi-grid-3x3-gap-fill fs-4 text-dark"></i>
-                    </button>
-                    <div id="myDropdown" class="dropdown-content">
-                        <% if (locals.user) { %>
-                            <a href="#"><i class="fas fa-user-circle"></i> Mi Perfil (<%= user %>)</a>
-                            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
-                        <% } else { %>
-                            <a href="/login"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
-                        <% } %>
-                        <a href="/admin"><i class="bi bi-shield-lock"></i> Panel Admin</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <main class="container mt-4">
-        
-        <!-- HERO SECTION COMPACTO CON SALUDO -->
-        <div class="hero-section">
-            <div class="row align-items-center">
-                <div class="col-lg-7">
-                    <span class="badge bg-primary mb-2 rounded-pill">Premium Service</span>
-                    
-                    <!-- 👋 LÍNEAS NUEVAS DE BIENVENIDA -->
-                    <% if (locals.user) { %>
-                        <h3 class="mb-1 text-light fw-normal">¡Hola, <span class="fw-bold text-warning"><%= user %></span>! 👋</h3>
-                    <% } %>
-                    <!-- FIN LÍNEAS NUEVAS -->
-
-                    <h1 class="mb-2 mt-2">Tu Minimarket <span class="text-primary">Inteligente</span></h1>
-                    <p class="opacity-75 small mb-4">Compara precios, ahorra con nuestra IA y recibe en casa.</p>
-                    
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="#productos" class="hero-btn"><i class="bi bi-cart3"></i> Comprar Ahora</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- GRILLA DE PRODUCTOS -->
-        <div id="productos" class="row g-4 mb-5">
-            <% productos.forEach(function(prod) { %>
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="product-card d-flex flex-column">
-                        <div class="img-box">
-                            <!-- LÓGICA DE RUTAS REPARADA -->
-                            <% 
-                                let rutaImagen = prod.imagen || "";
-                                if (!rutaImagen.startsWith('http')) {
-                                    // Limpiamos errores comunes de tipeo
-                                    rutaImagen = rutaImagen.replace(/^public\//, '');
-                                    rutaImagen = rutaImagen.replace(/^\//, ''); 
-                                    
-                                    // Si no trae la ruta completa, se la inyectamos:
-                                    if (!rutaImagen.startsWith('images/productos')) {
-                                        rutaImagen = '/images/productos/' + rutaImagen;
-                                    } else {
-                                        rutaImagen = '/' + rutaImagen;
-                                    }
-                                }
-                            %>
-                            <img src="<%= rutaImagen %>" onerror="this.src='https://placehold.co/400x400?text=Producto+Jireth'">
-                        </div>
-                        <div class="p-3 mt-auto border-top border-light">
-                            <h6 class="fw-bold mb-1 text-truncate" title="<%= prod.nombre %>"><%= prod.nombre %></h6>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="text-primary fw-800 fs-5">$<%= Number(prod.precio).toLocaleString('es-CL') %></span>
-                                <span class="badge bg-light text-muted fw-normal border">Stock: <%= prod.stock %></span>
-                            </div>
-                            <button class="btn-add d-flex justify-content-center align-items-center gap-2" onclick="add('<%= prod.id %>', '<%= prod.nombre %>', '<%= prod.precio %>')">
-                                <i class="bi bi-cart-plus fs-6"></i> Agregar
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Minimarket Jireth | Premium Store</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+            <style>
+                :root { --primary: #10b981; --dark: #0f172a; --light-bg: #f8fafc; }
+                body { background-color: var(--light-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--dark); overflow-x: hidden; }
+                .navbar { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(16, 185, 129, 0.1); padding: 12px 0; }
+                .hero-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: black; padding: 10px 20px; border-radius: 14px; font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: 0.3s; }
+                .hero-btn:hover { background: var(--primary); transform: translateY(1px); color: black; }
+                .whatsapp-float { position: fixed; bottom: 25px; right: 25px; background-color: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 10px 25px rgba(37,211,102,0.3); z-index: 2000; text-decoration: none; }
+                .product-card { background: white; border-radius: 24px; border: 1px solid rgba(0,0,0,0.03); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow: hidden; height: 100%; }
+                .product-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+                .img-box { height: 260px; padding: 10px; display: flex; align-items: center; justify-content: center; background: #fff; overflow: hidden; }
+                .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.4s ease; }
+                .product-card:hover .img-box img { transform: scale(1.1); }
+                .btn-add { background: var(--dark); color: white; border: none; border-radius: 14px; padding: 12px; font-weight: 700; width: 100%; transition: 0.3s; }
+                .btn-add:hover { background: var(--primary); }
+                .map-container { border-radius: 28px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+                .dropdown-content { display: none; position: absolute; right: 0; top: 55px; background: white; min-width: 220px; border-radius: 18px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); z-index: 1000; overflow: hidden; }
+                .dropdown-content.show { display: block; animation: fadeIn 0.3s; }
+                .dropdown-content a { color: var(--dark); padding: 14px 20px; text-decoration: none; display: flex; align-items: center; gap: 12px; }
+                .dropdown-content a:hover { background: #f0fdf4; color: var(--primary); }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+            </style>
+        </head>
+        <body>
+            <a href="https://wa.me/56948539049" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <nav class="navbar sticky-top">
+                <div class="container d-flex justify-content-between align-items-center">
+                    <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="/">
+                        <img src="/logo.png" height="42" onerror="this.src='/images/productos/images.jpeg'" class="rounded-3 shadow-sm"> 
+                        <span class="mb-0" style="font-size: 1.6rem; letter-spacing: -0.5px;">
+                            <span class="fw-800 text-primary">JIRETH</span><span class="fw-light text-dark ms-1">STORE</span>
+                        </span>
+                    </a>
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="/carrito" class="text-dark text-decoration-none position-relative p-2 bg-light border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-cart3 fs-5"></i>
+                            <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm" style="font-size: 0.65rem; border: 2px solid white;">
+                                <%= cantidad %>
+                            </span>
+                        </a>
+                        <div class="position-relative">
+                            <button class="border-0 bg-transparent d-flex align-items-center justify-content-center p-2 rounded-circle" style="width: 45px; height: 45px;" onclick="toggleMenu()">
+                                <i class="bi bi-grid-3x3-gap-fill fs-4 text-dark"></i>
                             </button>
+                            <div id="myDropdown" class="dropdown-content">
+                                <% if (locals.user) { %>
+                                    <a href="#"><i class="fas fa-user-circle"></i> Mi Perfil (<%= user %>)</a>
+                                    <a href="/logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                                <% } else { %>
+                                    <a href="/login"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
+                                <% } %>
+                                <a href="/admin"><i class="bi bi-shield-lock"></i> Panel Admin</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            <% }); %>
-        </div>
+            </nav>
 
-        <!-- SECCIÓN MAPA MODERNO -->
-        <div class="row mb-5 align-items-center">
-            <div class="col-md-4 mb-4 mb-md-0">
-                <h2 class="fw-800 mb-3">Estamos en el corazón de <span class="text-primary">Talagante</span></h2>
-                <p class="text-muted">Visítanos y conoce nuestra gran variedad de productos frescos y de calidad.</p>
-                <div class="p-3 bg-white border rounded-4 d-flex align-items-center gap-3 mb-3 shadow-sm">
-                    <i class="bi bi-geo-alt-fill text-danger fs-3"></i>
-                    <div>
-                        <div class="small fw-bold text-muted">DIRECCIÓN</div>
-                        <div class="fw-bold">Av. San Martin, Talagante</div>
+            <main class="container mt-4">
+                <div class="hero-section">
+                    <div class="row align-items-center">
+                        <div class="col-lg-7">
+                            <span class="badge bg-primary mb-2 rounded-pill">Servicio Especial</span>
+                            <% if (locals.user) { %>
+                                <h3 class="mb-1 text-light fw-normal">¡Hola, <span class="fw-bold text-warning"><%= user %></span>! 👋</h3>
+                            <% } %>
+                            <h1 class="mb-2 mt-2">El Minimarket <span class="text-primary">Mas Economico</span></h1>
+                            <p class="opacity-75 small mb-4">Compara precios y ahorra.</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="#productos" class="hero-btn"><i class="bi bi-cart3"></i> Comprar Ahora</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <a href="https://maps.google.com/?q=Av+San+Martin,+Talagante" target="_blank" class="btn btn-dark w-100 rounded-pill py-2">Cómo llegar</a>
-            </div>
-            <div class="col-md-8">
-                <div class="map-container">
-                    <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3324.00000000000!2d-70.932824!3d-33.665809!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAv.%20San%20Mart%C3%ADn%2C%20Talagante!5e0!3m2!1ses-419!2scl!4v1600000000000!5m2!1ses-419!2scl" 
-                        width="100%" height="350" style="border:0; filter: grayscale(0.2) contrast(1.1);" allowfullscreen="" loading="lazy">
-                    </iframe>
+
+                <div id="productos" class="row g-4 mb-5">
+                    <% productos.forEach(function(prod) { %>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="product-card d-flex flex-column">
+                                <div class="img-box">
+                                    <% 
+                                        let rutaImagen = prod.imagen || "";
+                                        if (!rutaImagen.startsWith('http')) {
+                                            rutaImagen = rutaImagen.replace(/^public\//, '').replace(/\\/g, '/').replace(/^\//, ''); 
+                                            if (!rutaImagen.startsWith('images/productos')) {
+                                                rutaImagen = '/images/productos/' + rutaImagen;
+                                            } else {
+                                                rutaImagen = '/' + rutaImagen;
+                                            }
+                                        }
+                                    %>
+                                    <img src="<%= rutaImagen %>" onerror="this.src='https://placehold.co/400x400?text=Producto+Jireth'">
+                                </div>
+                                <div class="p-3 mt-auto border-top border-light">
+                                    <h6 class="fw-bold mb-1 text-truncate" title="<%= prod.nombre %>"><%= prod.nombre %></h6>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-primary fw-800 fs-5">$<%= Number(prod.precio).toLocaleString('es-CL') %></span>
+                                        <span class="badge bg-light text-muted fw-normal border">Stock: <%= prod.stock %></span>
+                                    </div>
+                                    <!-- MODIFICACIÓN: Pasamos prod.imagen como 4to argumento -->
+                                    <button class="btn-add" onclick="add('<%= prod.id %>', '<%= prod.nombre %>', '<%= prod.precio %>', '<%= prod.imagen %>')">
+                                        <i class="bi bi-cart-plus fs-6"></i> Agregar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
                 </div>
-            </div>
-        </div>
-    </main>
 
+                <div class="row mb-5 align-items-center">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h2 class="fw-800 mb-3">Estamos en el corazón de <span class="text-primary">Talagante</span></h2>
+                        <p class="text-muted">Visítanos y conoce nuestra gran variedad de productos frescos y de calidad.</p>
+                        <div class="p-3 bg-white border rounded-4 d-flex align-items-center gap-3 mb-3 shadow-sm">
+                            <i class="bi bi-geo-alt-fill text-danger fs-3"></i>
+                            <div>
+                                <div class="small fw-bold text-muted">DIRECCIÓN</div>
+                                <div class="fw-bold">Av. San Martin 0443, Talagante</div>
+                            </div>
+                        </div>
+                        <a href="https://maps.google.com/?q=Av+San+Martin,+Talagante" target="_blank" class="btn btn-dark w-100 rounded-pill py-2">Cómo llegar</a>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="map-container">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3324.00000000000!2d-70.932824!3d-33.665809!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAv.%20San%20Mart%C3%ADn%2C%20Talagante!5e0!3m2!1ses-419!2scl!4v1600000000000!5m2!1ses-419!2scl" width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </main>
 
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-
-
-        function add(id, nombre, precio) {
-            fetch('/agregar-al-carrito', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id, nombre, precio })
-            })
-            .then(res => res.json())
-            .then(data => {
-                const badge = document.getElementById('cart-count');
-                badge.innerText = data.cantidad;
-                badge.style.transform = "scale(1.5)";
-                setTimeout(() => badge.style.transform = "scale(1)", 200);
-            });
-        }
-
-        function toggleMenu() {
-            document.getElementById("myDropdown").classList.toggle("show");
-        }
-
-        window.onclick = function(event) {
-            if (!event.target.closest('.position-relative')) {
-                const drop = document.getElementById("myDropdown");
-                if(drop.classList.contains('show')) drop.classList.remove('show');
-            }
-        }
-    </script>
-</body>
-</html>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                function add(id, nombre, precio, imagen) { 
+                    fetch('/agregar-al-carrito', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ id, nombre, precio, imagen }) 
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        const badge = document.getElementById('cart-count');
+                        badge.innerText = data.cantidad;
+                        badge.style.transform = "scale(1.3)";
+                        setTimeout(() => badge.style.transform = "scale(1)", 200);
+                    });
+                }
+                function toggleMenu() { document.getElementById("myDropdown").classList.toggle("show"); }
+                window.onclick = function(event) {
+                    if (!event.target.closest('.position-relative')) {
+                        const drop = document.getElementById("myDropdown");
+                        if(drop && drop.classList.contains('show')) drop.classList.remove('show');
+                    }
+                }
+            </script>
+        </body>
+        </html>
