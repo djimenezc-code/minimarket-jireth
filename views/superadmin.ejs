@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Super Admin | Jireth Minimarket</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7c3aed;
+      --primary-hover: #6d28d9;
+      --primary-light: #ede9fe;
+      --admin-color: #2563eb;
+      --admin-light: #eff6ff;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --bg: #f5f3ff;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    .topbar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .badge-superadmin {
+      background: var(--primary);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .topbar-nav { display: flex; align-items: center; gap: 8px; }
+    .topbar-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .topbar-link:hover { background: var(--primary-light); color: var(--primary); }
+    .topbar-link.danger:hover { background: var(--danger-light); color: var(--danger); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+      color: white;
+      padding: 2.5rem 2rem;
+    }
+    .hero h1 { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.25rem; }
+    .hero p { margin: 0; opacity: 0.85; font-size: 0.9rem; }
+
+    /* STATS */
+    .stats-row {
+      display: flex;
+      gap: 1rem;
+      padding: 1.5rem 2rem;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      flex: 1;
+      min-width: 160px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .stat-icon.purple { background: var(--primary-light); color: var(--primary); }
+    .stat-icon.blue { background: var(--admin-light); color: var(--admin-color); }
+    .stat-icon.gray { background: #f3f4f6; color: var(--muted); }
+    .stat-value { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-top: 2px; }
+
+    /* TABLE PANEL */
+    .panel {
+      margin: 0 2rem 2rem;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .panel-title { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+
+    /* SEARCH */
+    .search-input {
+      padding: 7px 14px 7px 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      outline: none;
+      background: #f9fafb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+      transition: border-color 0.2s;
+      min-width: 220px;
+    }
+    .search-input:focus { border-color: var(--primary); background-color: white; }
+
+    /* TABLE */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f9fafb;
+      padding: 0.875rem 1.25rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid #f3f4f6; transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+    tbody td { padding: 1rem 1.25rem; vertical-align: middle; font-size: 0.875rem; }
+
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .avatar-superadmin { background: var(--primary-light); color: var(--primary); }
+    .avatar-admin { background: var(--admin-light); color: var(--admin-color); }
+    .avatar-user { background: #f3f4f6; color: var(--muted); }
+
+    .user-name { font-weight: 600; color: var(--text); }
+    .user-email { font-size: 0.78rem; color: var(--muted); }
+
+    /* ROLE BADGES */
+    .role-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .role-superadmin { background: var(--primary-light); color: var(--primary); }
+    .role-admin { background: var(--admin-light); color: var(--admin-color); }
+    .role-user { background: #f3f4f6; color: var(--muted); }
+
+    /* ACTION BUTTONS */
+    .btn-action {
+      border: none;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-assign-admin { background: var(--admin-light); color: var(--admin-color); }
+    .btn-assign-admin:hover { background: #dbeafe; }
+    .btn-remove-admin { background: #fef3c7; color: #d97706; }
+    .btn-remove-admin:hover { background: #fde68a; }
+    .btn-assign-sa { background: var(--primary-light); color: var(--primary); }
+    .btn-assign-sa:hover { background: #ddd6fe; }
+    .btn-remove-sa { background: #fce7f3; color: #be185d; }
+    .btn-remove-sa:hover { background: #fbcfe8; }
+    .btn-delete { background: var(--danger-light); color: var(--danger); }
+    .btn-delete:hover { background: #fee2e2; }
+    .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ACTIONS CELL */
+    .actions-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #111827; color: white;
+      padding: 12px 20px; border-radius: 10px;
+      font-size: 0.875rem; font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 9999;
+      max-width: 320px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { background: #15803d; }
+    #toast.error { background: #b91c1c; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 500;
+      backdrop-filter: blur(2px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 380px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      animation: slideUp 0.2s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .modal-desc { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .modal-actions { display: flex; gap: 0.75rem; }
+    .btn-cancel { flex: 1; padding: 0.65rem; border: 1px solid var(--border); background: white; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.875rem; }
+    .btn-confirm-delete { flex: 1; padding: 0.65rem; background: var(--danger); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.875rem; }
+    .btn-confirm-delete:hover { background: #b91c1c; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--muted); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; opacity: 0.4; }
+
+    @media (max-width: 768px) {
+      .hero, .stats-row, .panel { padding-left: 1rem; padding-right: 1rem; }
+      .panel { margin-left: 1rem; margin-right: 1rem; }
+      .stats-row { flex-direction: column; }
+      .search-input { min-width: 150px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <a class="topbar-brand" href="/superadmin">
+    <i class="bi bi-shield-fill-check"></i>
+    Super Admin
+    <span class="badge-superadmin">SA</span>
+  </a>
+  <div class="topbar-nav">
+    <a href="/admin" class="topbar-link"><i class="bi bi-box-seam me-1"></i>Panel Admin</a>
+    <a href="/logout" class="topbar-link danger"><i class="bi bi-box-arrow-right me-1"></i>Salir</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1><i class="bi bi-people-fill me-2"></i>Gestión de Usuarios</h1>
+  <p>Asigna y revoca roles de administrador a los usuarios registrados.</p>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon gray"><i class="bi bi-people"></i></div>
+    <div>
+      <div class="stat-value" id="stat-total"><%= usuarios.length %></div>
+      <div class="stat-label">Usuarios totales</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon blue"><i class="bi bi-person-gear"></i></div>
+    <div>
+      <div class="stat-value" id="stat-admins"><%= usuarios.filter(u => u.is_admin && !u.is_superadmin).length %></div>
+      <div class="stat-label">Administradores</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon purple"><i class="bi bi-shield-fill-check"></i></div>
+    <div>
+      <div class="stat-value" id="stat-superadmins"><%= usuarios.filter(u => u.is_superadmin).length %></div>
+      <div class="stat-label">Super Admins</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABLE PANEL -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <i class="bi bi-table" style="color: var(--primary)"></i>
+      Listado de Usuarios
+    </div>
+    <input type="text" class="search-input" id="searchInput" placeholder="Buscar por nombre o email…" oninput="filtrarUsuarios()">
+  </div>
+
+  <% if (usuarios.length === 0) { %>
+    <div class="empty-state">
+      <i class="bi bi-person-x"></i>
+      No hay usuarios registrados aún.
+    </div>
+  <% } else { %>
+  <div style="overflow-x: auto;">
+    <table id="tablaUsuarios">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Rol actual</th>
+          <th>Acciones de rol</th>
+          <th>Eliminar</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyUsuarios">
+        <% usuarios.forEach(u => { %>
+        <tr data-id="<%= u.id %>" data-nombre="<%= u.nombre.toLowerCase() %>" data-email="<%= u.email.toLowerCase() %>">
+          <td>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="user-avatar <%= u.is_superadmin ? 'avatar-superadmin' : u.is_admin ? 'avatar-admin' : 'avatar-user' %>">
+                <%= u.nombre.charAt(0).toUpperCase() %>
+              </div>
+              <div>
+                <div class="user-name"><%= u.nombre %></div>
+                <div class="user-email"><%= u.email %></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="role-badge <%= u.is_superadmin ? 'role-superadmin' : u.is_admin ? 'role-admin' : 'role-user' %> role-display">
+              <% if (u.is_superadmin) { %>
+                <i class="bi bi-shield-fill-check"></i> Super Admin
+              <% } else if (u.is_admin) { %>
+                <i class="bi bi-person-gear"></i> Admin
+              <% } else { %>
+                <i class="bi bi-person"></i> Usuario
+              <% } %>
+            </span>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <% if (!u.is_admin && !u.is_superadmin) { %>
+                <button class="btn-action btn-assign-admin" onclick="cambiarRol(<%= u.id %>, 'admin', 'asignar', this)">
+                  <i class="bi bi-person-gear"></i> Hacer Admin
+                </button>
+              <% } else if (u.is_admin && !u.is_superadmin) { %>
+                <button class="btn-action btn-remove-admin" onclick="cambiarRol(<%= u.id %>, 'admin', 'quitar', this)">
+                  <i class="bi bi-person-dash"></i> Quitar Admin
+                </button>
+                <button class="btn-action btn-assign-sa" onclick="cambiarRol(<%= u.id %>, 'superadmin', 'asignar', this)">
+                  <i class="bi bi-shield-plus"></i> Hacer SA
+                </button>
+              <% } else if (u.is_superadmin) { %>
+                <button class="btn-action btn-remove-sa" onclick="cambiarRol(<%= u.id %>, 'superadmin', 'quitar', this)">
+                  <i class="bi bi-shield-minus"></i> Quitar SA
+                </button>
+              <% } %>
+            </div>
+          </td>
+          <td>
+            <button class="btn-action btn-delete" onclick="confirmarEliminar(<%= u.id %>, '<%= u.nombre.replace(/'/g, "\\'") %>')">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINAR -->
+<div class="modal-overlay" id="modalEliminar">
+  <div class="modal-box">
+    <div class="modal-icon">🗑️</div>
+    <div class="modal-title">¿Eliminar usuario?</div>
+    <div class="modal-desc" id="modalDesc">Esta acción no se puede deshacer.</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-confirm-delete" id="btnConfirmarEliminar">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><span id="toastMsg"></span></div>
+
+<script>
+  let userIdToDelete = null;
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    const m = document.getElementById('toastMsg');
+    m.textContent = msg;
+    t.className = 'show ' + type;
+    setTimeout(() => t.className = '', 3000);
+  }
+
+  async function cambiarRol(userId, tipo, accion, btn) {
+    btn.disabled = true;
+    const endpoint = tipo === 'superadmin' ? '/superadmin/asignar-superadmin' : '/superadmin/asignar-admin';
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, accion })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(accion === 'asignar'
+          ? `Rol ${tipo === 'superadmin' ? 'Super Admin' : 'Admin'} asignado correctamente ✓`
+          : `Rol removido correctamente ✓`);
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        showToast('Error: ' + (data.error || 'Desconocido'), 'error');
+        btn.disabled = false;
+      }
+    } catch (e) {
+      showToast('Error de conexión', 'error');
+      btn.disabled = false;
+    }
+  }
+
+  function confirmarEliminar(userId, nombre) {
+    userIdToDelete = userId;
+    document.getElementById('modalDesc').textContent = `¿Estás seguro que deseas eliminar a "${nombre}"? Esta acción no se puede deshacer.`;
+    document.getElementById('modalEliminar').classList.add('active');
+    document.getElementById('btnConfirmarEliminar').onclick = ejecutarEliminar;
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalEliminar').classList.remove('active');
+    userIdToDelete = null;
+  }
+
+  async function ejecutarEliminar() {
+    if (!userIdToDelete) return;
+    const btn = document.getElementById('btnConfirmarEliminar');
+    btn.disabled = true;
+    btn.textContent = 'Eliminando…';
+    try {
+      const res = await fetch('/superadmin/eliminar-usuario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userIdToDelete })
+      });
+      const data = await res.json();
+      if (data.success) {
+        cerrarModal();
+        showToast('Usuario eliminado correctamente ✓');
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        showToast('Error: ' + (data.error || 'Desconocido'), 'error');
+        btn.disabled = false;
+        btn.textContent = 'Eliminar';
+      }
+    } catch (e) {
+      showToast('Error de conexión', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Eliminar';
+    }
+  }
+
+  function filtrarUsuarios() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#tbodyUsuarios tr').forEach(row => {
+      const nombre = row.dataset.nombre || '';
+      const email = row.dataset.email || '';
+      row.style.display = (nombre.includes(q) || email.includes(q)) ? '' : 'none';
+    });
+  }
+
+  // Cerrar modal al hacer clic fuera
+  document.getElementById('modalEliminar').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+  });
+</script>
+</body>
+</html>
