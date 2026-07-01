@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historial de Compras — Jireth Minimarket</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root { --primary: #2563eb; --primary-dark: #1d4ed8; }
+    body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; }
+    .page-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white; padding: 24px 32px; border-radius: 16px; margin-bottom: 24px;
+    }
+    .search-card {
+      background: white; border-radius: 14px; padding: 20px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 20px;
+    }
+    .table thead th {
+      background: #f8fafc; font-weight: 600;
+      text-transform: uppercase; font-size: 0.72rem;
+      letter-spacing: 0.06em; color: #6b7280;
+      padding: 12px 14px; border-top: none;
+    }
+    .table tbody td { padding: 12px 14px; vertical-align: middle; border-color: #f1f5f9; }
+    .table-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+    .badge-entregado { background: #dcfce7; color: #16a34a; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+    .num-compra { font-family: monospace; letter-spacing: 1px; color: var(--primary); font-weight: 800; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 12px; opacity: 0.4; }
+    .back-btn { color: white; text-decoration: none; opacity: 0.85; font-size: 0.9rem; }
+    .back-btn:hover { opacity: 1; color: white; }
+    .detail-modal .modal-header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+  </style>
+</head>
+<body>
+<div class="container py-4" style="max-width:1000px;">
+
+  <!-- Header -->
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h2 class="mb-1 fw-bold"><i class="bi bi-clock-history me-2"></i>Historial de Compras</h2>
+      <p class="mb-0 opacity-75" style="font-size:0.9rem;">Registro de pedidos entregados del mes</p>
+    </div>
+    <a href="/admin" class="back-btn"><i class="bi bi-arrow-left me-1"></i>Volver al panel</a>
+  </div>
+
+  <!-- Buscador -->
+  <div class="search-card">
+    <form method="GET" action="/admin/historial" class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label fw-semibold mb-1" style="font-size:0.85rem;"><i class="bi bi-person me-1"></i>Buscar por usuario</label>
+        <input type="text" name="usuario" class="form-control" placeholder="Nombre o correo…" value="<%= usuario %>">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold mb-1" style="font-size:0.85rem;"><i class="bi bi-calendar me-1"></i>Buscar por fecha</label>
+        <input type="text" name="fecha" class="form-control" placeholder="Ej: 29-06-2026" value="<%= fecha %>">
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-search me-1"></i>Buscar</button>
+        <% if (usuario || fecha) { %>
+          <a href="/admin/historial" class="btn btn-outline-secondary" title="Limpiar filtros"><i class="bi bi-x-lg"></i></a>
+        <% } %>
+      </div>
+    </form>
+  </div>
+
+  <!-- Resultados -->
+  <% if (compras.length === 0) { %>
+    <div class="table-card">
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <% if (usuario || fecha) { %>
+          <p class="fw-semibold mb-1">Sin resultados</p>
+          <p style="font-size:0.9rem;">No se encontraron pedidos con ese criterio de búsqueda.</p>
+        <% } else { %>
+          <p class="fw-semibold mb-1">Historial vacío</p>
+          <p style="font-size:0.9rem;">Aún no hay pedidos entregados registrados.</p>
+        <% } %>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="table-card">
+      <div class="px-3 py-2 border-bottom d-flex align-items-center justify-content-between" style="background:#f8fafc;">
+        <span class="text-muted" style="font-size:0.82rem;"><%= compras.length %> pedido(s) encontrado(s)</span>
+        <span class="badge bg-success-subtle text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Todos entregados</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>N° Compra</th>
+              <th>Cliente</th>
+              <th>Fecha pedido</th>
+              <th>Hora</th>
+              <th>Fecha entrega</th>
+              <th>Total</th>
+              <th>Ver</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% compras.forEach(c => { %>
+            <tr>
+              <td><span class="num-compra"><%= c.numero_compra %></span></td>
+              <td>
+                <div class="fw-semibold" style="font-size:0.9rem;"><%= c.usuario_nombre %></div>
+                <div class="text-muted" style="font-size:0.78rem;"><%= c.usuario_email %></div>
+              </td>
+              <td><%= c.fecha %></td>
+              <td><%= c.hora %></td>
+              <td><span class="badge-entregado"><i class="bi bi-check2 me-1"></i><%= c.fecha_entrega %></span></td>
+              <td class="fw-bold">$<%= parseInt(c.total).toLocaleString('es-CL') %></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="verDetalle(this)"
+                  data-numero="<%= c.numero_compra %>"
+                  data-nombre="<%= c.usuario_nombre %>"
+                  data-fecha="<%= c.fecha %>"
+                  data-hora="<%= c.hora %>"
+                  data-total="<%= c.total %>"
+                  data-fecha-entrega="<%= c.fecha_entrega %>"
+                  data-items='<%- JSON.stringify(JSON.parse(c.items)) %>'>
+                  <i class="bi bi-eye"></i>
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<!-- Modal detalle -->
+<div class="modal fade detail-modal" id="modalDetalle" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold"><i class="bi bi-receipt me-2"></i>Detalle de Compra</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="d-flex justify-content-between mb-3 p-3 rounded-3" style="background:#eff6ff;">
+          <div>
+            <div class="text-muted" style="font-size:11px;text-transform:uppercase;font-weight:700;">N° Compra</div>
+            <div id="d-numero" style="font-size:1.3rem;font-weight:800;color:#2563eb;font-family:monospace;letter-spacing:1px;"></div>
+          </div>
+          <div class="text-end">
+            <div class="text-muted" style="font-size:11px;text-transform:uppercase;font-weight:700;">Fecha</div>
+            <div id="d-fecha" class="fw-semibold" style="font-size:13px;"></div>
+            <div class="text-muted mt-1" style="font-size:11px;text-transform:uppercase;font-weight:700;">Hora</div>
+            <div id="d-hora" class="fw-semibold" style="font-size:13px;"></div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="text-muted" style="font-size:11px;text-transform:uppercase;font-weight:700;">Cliente</div>
+          <div id="d-nombre" class="fw-semibold"></div>
+        </div>
+        <table class="table table-sm mb-3">
+          <thead style="background:#f8fafc;">
+            <tr>
+              <th style="font-size:11px;color:#6b7280;text-transform:uppercase;">Producto</th>
+              <th style="font-size:11px;color:#6b7280;text-transform:uppercase;text-align:center;">Cant.</th>
+              <th style="font-size:11px;color:#6b7280;text-transform:uppercase;text-align:right;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="d-items"></tbody>
+        </table>
+        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+          <span class="text-muted small fw-bold text-uppercase">Total</span>
+          <span id="d-total" style="font-size:1.4rem;font-weight:800;color:#2563eb;"></span>
+        </div>
+        <div class="alert alert-success py-2 px-3 mt-3" style="font-size:0.85rem;border-radius:8px;">
+          <i class="bi bi-calendar-check me-1"></i>
+          Entregado el: <strong id="d-fecha-entrega"></strong>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn btn-secondary rounded-3 w-100" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function verDetalle(btn) {
+    const d = btn.dataset;
+    document.getElementById('d-numero').textContent = d.numero;
+    document.getElementById('d-nombre').textContent = d.nombre;
+    document.getElementById('d-fecha').textContent = d.fecha;
+    document.getElementById('d-hora').textContent = d.hora;
+    document.getElementById('d-total').textContent = '$' + parseInt(d.total).toLocaleString('es-CL');
+    document.getElementById('d-fecha-entrega').textContent = d.fechaEntrega;
+    const items = JSON.parse(d.items);
+    document.getElementById('d-items').innerHTML = items.map(i =>
+      `<tr>
+        <td>${i.nombre}</td>
+        <td style="text-align:center;">${i.cantidad}</td>
+        <td style="text-align:right;font-weight:600;">$${(i.precio * i.cantidad).toLocaleString('es-CL')}</td>
+      </tr>`
+    ).join('');
+    new bootstrap.Modal(document.getElementById('modalDetalle')).show();
+  }
+</script>
+</body>
+</html>
