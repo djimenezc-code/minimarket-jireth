@@ -1,9 +1,18 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./minimarket.db');
+require('dotenv').config();
+const { Pool } = require('pg');
 
-db.run("DELETE FROM productos", (err) => {
-    if (err) return console.error(err.message);
-    console.log("✅ Tabla de productos vaciada. Espacio limpio para el nuevo inventario.");
-});
+const pool = require('../db'); // Reutilizamos la configuración de conexión desde db.js
 
-db.close();
+async function main() {
+    try {
+        await pool.query("DELETE FROM productos");
+        console.log("✅ Tabla de productos vaciada. Espacio limpio para el nuevo inventario.");
+    } catch (err) {
+        console.error(err.message);
+        process.exitCode = 1;
+    } finally {
+        await pool.end();
+    }
+}
+
+main();
