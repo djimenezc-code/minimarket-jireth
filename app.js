@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const { Pool } = require('pg');
 const path = require('path');
 const session = require('express-session');
 const nodemailer = require('nodemailer');
@@ -91,8 +90,8 @@ function htmlBoleta({ numero_compra, usuario_nombre, usuario_email, items, total
                 <div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;">N° Compra</div>
                 <div style="font-size:20px;font-weight:800;color:#2563eb;letter-spacing:2px;margin-top:2px;">${numero_compra}</div>
             </div>
-            <div style="border-top:1px solid #bfdbfe;padding-top:12px;display:flex;gap:32px;">
-                <div>
+            <div style="border-top:1px solid #bfdbfe;padding-top:12px;">
+                <div style="margin-bottom:10px;">
                     <div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;">Fecha</div>
                     <div style="font-size:13px;font-weight:600;color:#1e293b;margin-top:2px;">${fecha}</div>
                 </div>
@@ -229,7 +228,6 @@ app.post('/login', async (req, res) => {
         const { rows } = await pool.query("SELECT * FROM usuarios WHERE email = $1 AND password = $2", [email, password]);
         const user = rows[0];
         if (!user) return res.render('login', { error: "Credenciales incorrectas", mensaje: null });
-        if (!user.verificado) return res.render('login', { error: "Debes verificar tu correo antes de ingresar. Revisa tu Gmail.", mensaje: null });
         req.session.userId = user.id;
         req.session.userName = user.nombre;
         res.redirect('/');
@@ -245,23 +243,21 @@ app.post('/registro', async (req, res) => {
         const { rows } = await pool.query("SELECT * FROM usuarios WHERE email = $1", [email]);
         if (rows[0]) return res.render('registro', { error: "Correo ya registrado.", mensaje: null });
 
-        const token = generarTokenVerificacion();
+        let user;
         try {
-            await pool.query(
-                "INSERT INTO usuarios (nombre, email, password, verificado, token_verificacion) VALUES ($1, $2, $3, 0, $4)",
-                [nombre, email, password, token]
+            const insertResult = await pool.query(
+                "INSERT INTO usuarios (nombre, email, password, verificado) VALUES ($1, $2, $3, 1) RETURNING id, nombre",
+                [nombre, email, password]
             );
+            user = insertResult.rows[0];
         } catch (err) {
             return res.render('registro', { error: "Error al crear cuenta.", mensaje: null });
         }
 
-        try {
-            await enviarVerificacion(email, nombre, token);
-            res.render('registro', { error: null, mensaje: `Cuenta creada. Revisa tu Gmail (${email}) para verificar tu cuenta.` });
-        } catch (e) {
-            console.error('Error enviando verificación:', e.message);
-            res.render('registro', { error: null, mensaje: `Cuenta creada pero hubo un error enviando el correo. Contacta al administrador.` });
-        }
+        // Cuenta creada y activa de inmediato: se inicia sesión sin requerir verificación de correo.
+        req.session.userId = user.id;
+        req.session.userName = user.nombre;
+        res.redirect('/');
     } catch (err) {
         res.render('registro', { error: "Error al crear cuenta.", mensaje: null });
     }
@@ -346,7 +342,7 @@ app.get('/admin', protegerAdmin, async (req, res) => {
             }
             porUsuario[c.usuario_id].compras.push(c);
         });
-        res.render('admin', { productos, comprasPorUsuario: porUsuario, todasCompras: compras || [] });
+        res.render('admin', { productos, comprasPorUsuario: porUsuario, todasCompras: compras || [], error: req.query.error || null });
     } catch (err) {
         res.status(500).send("Error al cargar el panel de administración.");
     }
@@ -356,8 +352,9 @@ app.post('/admin/agregar', protegerAdmin, upload.single('imagen_file'), async (r
     const { nombre, categoria, precio, stock } = req.body;
     const precioInt = parseInt(precio) || 0;
     const stockInt = parseInt(stock) || 0;
-    if (precioInt >= 10000) return res.redirect('/admin?error=precio');
+    if (precioInt >= 50000) return res.redirect('/admin?error=precio');
     if (stockInt >= 10000) return res.redirect('/admin?error=stock');
+    if (precioInt === 0) return res.redirect('/admin?error=precio-cero');
     // Si subió un archivo, usar ese nombre; si no, usar el texto escrito
     const imagen = req.file ? req.file.filename : (req.body.imagen || '');
     try {
@@ -373,8 +370,13 @@ app.post('/admin/agregar', protegerAdmin, upload.single('imagen_file'), async (r
 
 app.post('/admin/editar', protegerAdmin, async (req, res) => {
     const { id, precio, stock } = req.body;
+    const precioInt = parseInt(precio) || 0;
+    const stockInt = parseInt(stock) || 0;
+    if (precioInt === 0) {
+        return res.json({ success: false, error: 'El precio no puede ser 0.' });
+    }
     try {
-        await pool.query("UPDATE productos SET precio = $1, stock = $2 WHERE id = $3", [precio, stock, id]);
+        await pool.query("UPDATE productos SET precio = $1, stock = $2 WHERE id = $3", [precioInt, stockInt, id]);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false });
@@ -520,37 +522,17 @@ app.post('/superadmin/asignar-admin', protegerSuperAdmin, async (req, res) => {
     }
 });
 
-app.post('/superadmin/asignar-superadmin', protegerSuperAdmin, async (req, res) => {
-    const { userId, accion } = req.body;
-    if (!userId || !['asignar', 'quitar'].includes(accion)) return res.json({ success: false });
-    const valor = accion === 'asignar' ? 1 : 0;
-    try {
-        await pool.query("UPDATE usuarios SET is_superadmin = $1, is_admin = $2 WHERE id = $3", [valor, valor, userId]);
-        res.json({ success: true });
-    } catch (err) {
-        res.json({ success: false });
-    }
-});
-
-app.post('/superadmin/eliminar-usuario', protegerSuperAdmin, async (req, res) => {
-    const { userId } = req.body;
-    try {
-        await pool.query("DELETE FROM usuarios WHERE id = $1", [userId]);
-        res.json({ success: true, error: null });
-    } catch (err) {
-        res.json({ success: false, error: err.message });
-    }
-});
-
 // ── CARRITO ──────────────────────────────────────────────────────────────────
 app.post('/agregar-al-carrito', protegerUsuario, async (req, res) => {
     const { id, nombre, precio, imagen } = req.body;
     try {
-        const { rows } = await pool.query("SELECT stock FROM productos WHERE id = $1", [id]);
+        const { rows } = await pool.query("SELECT stock, precio FROM productos WHERE id = $1", [id]);
         const prod = rows[0];
         if (!prod) return res.json({ error: "Producto no encontrado" });
         const stockDisponible = parseInt(prod.stock) || 0;
+        const precioProducto = parseInt(prod.precio) || 0;
         if (!req.session.carrito) req.session.carrito = [];
+        if (precioProducto <= 0) return res.json({ cantidad: req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0), error: 'Este producto no está disponible para la venta.' });
         const item = req.session.carrito.find(p => p.id == id);
         const cantidadActual = item ? item.cantidad : 0;
         if (stockDisponible <= 0) return res.json({ cantidad: req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0), error: 'Producto sin stock disponible.' });
@@ -561,7 +543,7 @@ app.post('/agregar-al-carrito', protegerUsuario, async (req, res) => {
             });
         }
         if (item) item.cantidad++;
-        else req.session.carrito.push({ id, nombre, precio: parseInt(precio), cantidad: 1, imagen });
+        else req.session.carrito.push({ id, nombre, precio: precioProducto, cantidad: 1, imagen });
         res.json({ cantidad: req.session.carrito.reduce((acc, i) => acc + i.cantidad, 0) });
     } catch (err) {
         res.json({ error: "Producto no encontrado" });
