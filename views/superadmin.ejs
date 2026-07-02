@@ -346,7 +346,6 @@
           <th>Usuario</th>
           <th>Rol actual</th>
           <th>Acciones de rol</th>
-          <th>Eliminar</th>
         </tr>
       </thead>
       <tbody id="tbodyUsuarios">
@@ -384,20 +383,10 @@
                 <button class="btn-action btn-remove-admin" onclick="cambiarRol(<%= u.id %>, 'admin', 'quitar', this)">
                   <i class="bi bi-person-dash"></i> Quitar Admin
                 </button>
-                <button class="btn-action btn-assign-sa" onclick="cambiarRol(<%= u.id %>, 'superadmin', 'asignar', this)">
-                  <i class="bi bi-shield-plus"></i> Hacer SA
-                </button>
               <% } else if (u.is_superadmin) { %>
-                <button class="btn-action btn-remove-sa" onclick="cambiarRol(<%= u.id %>, 'superadmin', 'quitar', this)">
-                  <i class="bi bi-shield-minus"></i> Quitar SA
-                </button>
+                <span class="text-muted" style="font-size:0.8rem;">— Super Admin —</span>
               <% } %>
             </div>
-          </td>
-          <td>
-            <button class="btn-action btn-delete" onclick="confirmarEliminar(<%= u.id %>, '<%= u.nombre.replace(/'/g, "\\'") %>')">
-              <i class="bi bi-trash3"></i>
-            </button>
           </td>
         </tr>
         <% }) %>
@@ -407,25 +396,10 @@
   <% } %>
 </div>
 
-<!-- MODAL CONFIRMAR ELIMINAR -->
-<div class="modal-overlay" id="modalEliminar">
-  <div class="modal-box">
-    <div class="modal-icon">🗑️</div>
-    <div class="modal-title">¿Eliminar usuario?</div>
-    <div class="modal-desc" id="modalDesc">Esta acción no se puede deshacer.</div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-confirm-delete" id="btnConfirmarEliminar">Eliminar</button>
-    </div>
-  </div>
-</div>
-
 <!-- TOAST -->
 <div id="toast"><span id="toastMsg"></span></div>
 
 <script>
-  let userIdToDelete = null;
-
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     const m = document.getElementById('toastMsg');
@@ -436,7 +410,7 @@
 
   async function cambiarRol(userId, tipo, accion, btn) {
     btn.disabled = true;
-    const endpoint = tipo === 'superadmin' ? '/superadmin/asignar-superadmin' : '/superadmin/asignar-admin';
+    const endpoint = '/superadmin/asignar-admin';
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -446,8 +420,8 @@
       const data = await res.json();
       if (data.success) {
         showToast(accion === 'asignar'
-          ? `Rol ${tipo === 'superadmin' ? 'Super Admin' : 'Admin'} asignado correctamente ✓`
-          : `Rol removido correctamente ✓`);
+          ? 'Rol Admin asignado correctamente ✓'
+          : 'Rol removido correctamente ✓');
         setTimeout(() => location.reload(), 1200);
       } else {
         showToast('Error: ' + (data.error || 'Desconocido'), 'error');
@@ -456,46 +430,6 @@
     } catch (e) {
       showToast('Error de conexión', 'error');
       btn.disabled = false;
-    }
-  }
-
-  function confirmarEliminar(userId, nombre) {
-    userIdToDelete = userId;
-    document.getElementById('modalDesc').textContent = `¿Estás seguro que deseas eliminar a "${nombre}"? Esta acción no se puede deshacer.`;
-    document.getElementById('modalEliminar').classList.add('active');
-    document.getElementById('btnConfirmarEliminar').onclick = ejecutarEliminar;
-  }
-
-  function cerrarModal() {
-    document.getElementById('modalEliminar').classList.remove('active');
-    userIdToDelete = null;
-  }
-
-  async function ejecutarEliminar() {
-    if (!userIdToDelete) return;
-    const btn = document.getElementById('btnConfirmarEliminar');
-    btn.disabled = true;
-    btn.textContent = 'Eliminando…';
-    try {
-      const res = await fetch('/superadmin/eliminar-usuario', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userIdToDelete })
-      });
-      const data = await res.json();
-      if (data.success) {
-        cerrarModal();
-        showToast('Usuario eliminado correctamente ✓');
-        setTimeout(() => location.reload(), 1200);
-      } else {
-        showToast('Error: ' + (data.error || 'Desconocido'), 'error');
-        btn.disabled = false;
-        btn.textContent = 'Eliminar';
-      }
-    } catch (e) {
-      showToast('Error de conexión', 'error');
-      btn.disabled = false;
-      btn.textContent = 'Eliminar';
     }
   }
 
@@ -507,11 +441,6 @@
       row.style.display = (nombre.includes(q) || email.includes(q)) ? '' : 'none';
     });
   }
-
-  // Cerrar modal al hacer clic fuera
-  document.getElementById('modalEliminar').addEventListener('click', function(e) {
-    if (e.target === this) cerrarModal();
-  });
 </script>
 </body>
 </html>
