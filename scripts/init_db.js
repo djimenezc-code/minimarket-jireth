@@ -3,27 +3,14 @@
 //
 // Requiere el paquete "pg":   npm install pg
 //
-// Variables de entorno esperadas (puedes definirlas en un .env):
-//   DATABASE_URL=postgres://usuario:password@host:5432/minimarket
-// o, alternativamente:
-//   PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
+// Variables de entorno esperadas en tu .env (ver db.js):
+//   PG_HOST, PG_PORT, PG_DB, PG_USER, PG_PASSWORD
 //
-// Uso:  node init_db.js
+// Uso:  node scripts/init_db.js
 
 require('dotenv').config();
-const { Pool } = require('pg');
 
-const pool = new Pool(
-    process.env.DATABASE_URL
-        ? { connectionString: process.env.DATABASE_URL }
-        : {
-            host: process.env.PGHOST || 'localhost',
-            port: process.env.PGPORT || 5432,
-            user: process.env.PGUSER || 'postgres',
-            password: process.env.PGPASSWORD || 'postgres',
-            database: process.env.PGDATABASE || 'minimarket'
-        }
-);
+const pool = require('../db'); // Reutilizamos la configuración de conexión desde db.js
 
 // Productos de prueba (semilla inicial)
 const PRODUCTOS_SEED = [
@@ -131,3 +118,4 @@ async function init() {
 }
 
 init();
+
