@@ -5,14 +5,30 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "node app.js"
+    "dev": "node app.js",
+    "init-db": "node scripts/init_db.js",
+    "seed": "node scripts/seed.js",
+    "master-reset": "node scripts/master_reset.js",
+    "limpiar-db": "node scripts/limpiar_db.js",
+    "reparar-imagenes": "node scripts/reparar_imagenes.js",
+    "update-db": "node scripts/update_db.js"
   },
   "dependencies": {
+<<<<<<< HEAD
     "ejs": "^3.1.9",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "mysql2": "^3.24.6",
     "sqlite3": "^5.1.6",
+=======
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.13",
+    "pg": "^8.11.5",
+>>>>>>> dc5d677256b6522319077121b2ab9a1eafc2cba7
     "transbank-sdk": "^3.0.1"
   },
   "keywords": [

@@ -1,5 +1,7 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./minimarket.db');
+require('dotenv').config();
+const { Pool } = require('pg');
+
+const pool = require('../db'); // Reutilizamos la configuración de conexión desde db.js
 
 const productosMaster = [
     // FRUTAS Y VERDURAS
@@ -35,19 +37,32 @@ const productosMaster = [
     ['Chocolate Suizo 100g', 'Snacks', 2500, 30, 'https://images.pexels.com/photos/65882/chocolate-dark-coffee-confectionery-65882.jpeg?auto=compress&cs=tinysrgb&w=400']
 ];
 
-db.serialize(() => {
-    console.log("🚀 Iniciando limpieza de base de datos...");
-    db.run("DELETE FROM productos");
-    
-    const stmt = db.prepare("INSERT INTO productos (nombre, categoria, precio, stock, imagen) VALUES (?, ?, ?, ?, ?)");
-    
-    productosMaster.forEach(p => {
-        stmt.run(p, (err) => {
-            if (err) console.error("Error al insertar:", p[0], err.message);
-        });
-    });
-    
-    stmt.finalize();
-    console.log("✅ Sistema reconstruido con 22 productos de alta calidad.");
-});
-db.close();
+async function main() {
+    const client = await pool.connect();
+    try {
+        console.log("🚀 Iniciando limpieza de base de datos...");
+        await client.query('BEGIN');
+        await client.query("DELETE FROM productos");
+
+        const insertText = "INSERT INTO productos (nombre, categoria, precio, stock, imagen) VALUES ($1, $2, $3, $4, $5)";
+        for (const p of productosMaster) {
+            try {
+                await client.query(insertText, p);
+            } catch (err) {
+                console.error("Error al insertar:", p[0], err.message);
+            }
+        }
+
+        await client.query('COMMIT');
+        console.log("✅ Sistema reconstruido con 22 productos de alta calidad.");
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error("✖ Error en master_reset:", err.message);
+        process.exitCode = 1;
+    } finally {
+        client.release();
+        await pool.end();
+    }
+}
+
+main();

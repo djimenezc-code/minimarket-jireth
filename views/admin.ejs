@@ -57,6 +57,7 @@
     .action-btn { width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); background: white; color: var(--text-muted); transition: all 0.2s; }
     .action-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
     .action-btn.delete:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+    .action-btn.btn-agregar-stock:hover { border-color: #16a34a; color: #16a34a; background: #f0fdf4; }
 
     .badge-stock { padding: 0.35em 0.65em; font-weight: 600; border-radius: 6px; font-size: 0.75rem; }
 
@@ -73,8 +74,13 @@
         <span>JIRETH <span class="fw-light text-secondary">SYSTEM</span></span>
       </a>
       <div class="d-none d-md-flex gap-2">
+        <% if (!locals.isSuperAdmin) { %>
         <a href="/" class="nav-link-custom"><i class="bi bi-arrow-up-right"></i> Ir a Tienda</a>
+        <% } %>
         <a href="/admin" class="nav-link-custom active"><i class="bi bi-box-seam"></i> Inventario</a>
+        <% if (locals.isSuperAdmin) { %>
+        <a href="/superadmin" class="nav-link-custom" style="color:#7c3aed;"><i class="bi bi-shield-fill-check"></i> Gestión Usuarios</a>
+        <% } %>
         <a href="/logout" class="nav-link-custom"><i class="bi bi-door-open"></i> Cerrar Sesión</a>
       </div>
     </div>
@@ -99,6 +105,17 @@
   </header>
 
   <main class="container mb-5">
+    <% if (locals.error) { %>
+      <% const mensajesError = {
+        precio: 'El precio debe ser menor a $50.000.',
+        stock: 'El stock debe ser menor a 10.000 unidades.',
+        'precio-cero': 'El precio no puede ser 0.'
+      }; %>
+      <div class="alert alert-danger d-flex align-items-center gap-2 mt-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div><%= mensajesError[error] || 'No se pudo guardar el producto.' %></div>
+      </div>
+    <% } %>
     <!-- RESUMEN DE MÉTRICAS -->
     <div class="row g-3 mb-4">
       <div class="col-md-3">
@@ -198,12 +215,12 @@
                 <td>
                   <div class="input-group input-group-sm">
                     <span class="input-group-text">$</span>
-                    <input id="p-<%= p.id %>" type="number" class="form-control" value="<%= p.precio %>">
+                    <input id="p-<%= p.id %>" type="number" class="form-control" value="<%= p.precio %>" max="49999" oninput="validarPrecio(this)">
                   </div>
                 </td>
                 <td>
                   <div class="d-flex align-items-center gap-2">
-                    <input id="s-<%= p.id %>" type="number" class="form-control form-control-sm w-50" value="<%= p.stock %>">
+                    <span id="stock-<%= p.id %>" class="fw-bold fs-6"><%= p.stock %></span>
                     <% if(Number(p.stock) <= 5) { %>
                       <span class="badge-stock bg-danger-subtle text-danger">Bajo</span>
                     <% } else { %>
@@ -215,6 +232,9 @@
                   <div class="d-flex justify-content-end gap-2">
                     <button class="action-btn" title="Guardar Cambios" onclick="updateItem('<%= p.id %>')">
                       <i class="bi bi-floppy-fill"></i>
+                    </button>
+                    <button class="action-btn btn-agregar-stock" title="Agregar Stock" data-id="<%= p.id %>" data-nombre="<%= p.nombre %>" data-stock="<%= p.stock %>" onclick="abrirModalStockFromButton(this)">
+                      <i class="bi bi-plus-circle-fill"></i>
                     </button>
                     <button class="action-btn delete" title="Eliminar" onclick="deleteItem('<%= p.id %>')">
                       <i class="bi bi-trash3"></i>
@@ -238,7 +258,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <!-- IMPORTANTE: Se quitó el enctype para que NodeJs pueda leer los datos -->
-        <form action="/admin/agregar" method="POST">
+        <form action="/admin/agregar" method="POST" enctype="multipart/form-data">
           <div class="modal-body p-4">
             <div class="mb-3">
               <label class="form-label fw-semibold">Nombre del Producto</label>
@@ -249,12 +269,12 @@
                 <label class="form-label fw-semibold">Precio de Venta</label>
                 <div class="input-group">
                   <span class="input-group-text">$</span>
-                  <input name="precio" type="number" class="form-control" required>
+                  <input name="precio" type="number" class="form-control" required min="0" max="49999" oninput="validarPrecio(this)">
                 </div>
               </div>
               <div class="col-6">
                 <label class="form-label fw-semibold">Stock Inicial</label>
-                <input name="stock" type="number" class="form-control" required>
+                <input name="stock" type="number" class="form-control" required min="0" max="9999" oninput="validarStock(this)">
               </div>
             </div>
             <div class="mt-3">
@@ -267,9 +287,9 @@
               </select>
             </div>
             <div class="mt-3">
-              <label class="form-label fw-semibold">Nombre de la Imagen</label>
-              <input name="imagen" type="text" class="form-control" placeholder="Ej: arroz.jpeg" required>
-              <div class="form-text" style="font-size: 0.8rem;">Escribe el nombre exacto de la imagen que arrastraste a la carpeta <b>public/images/productos/</b> en tu VS Code.</div>
+              <label class="form-label fw-semibold">Imagen del Producto</label>
+              <input name="imagen_file" type="file" class="form-control" accept="image/*" required>
+              <div class="form-text" style="font-size:0.8rem;">Sube directamente la imagen desde tu computador (jpg, png, webp).</div>
             </div>
           </div>
           <div class="modal-footer bg-light">
@@ -291,10 +311,198 @@
     </div>
   </div>
 
+
+  <!-- ── SECCIÓN BOLETAS ─────────────────────────────────────────────────── -->
+  <div class="container-fluid px-4 pb-5">
+    <div class="data-panel mb-4">
+      <div class="panel-actions d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="fw-bold d-flex align-items-center gap-2" style="font-size:1rem;">
+          <i class="bi bi-receipt text-primary"></i> Boletas de Compra
+          <span class="badge bg-primary-subtle text-primary ms-1"><%= todasCompras.length %></span>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-sm btn-outline-secondary active" onclick="toggleVista('tabla')" id="btnTabla"><i class="bi bi-table me-1"></i>Todas</button>
+          <button class="btn btn-sm btn-outline-primary" onclick="toggleVista('usuario')" id="btnUsuario"><i class="bi bi-person-lines-fill me-1"></i>Por usuario</button>
+          <a href="/admin/historial" class="btn btn-sm btn-outline-success"><i class="bi bi-clock-history me-1"></i>Historial</a>
+        </div>
+      </div>
+      <div id="vistaTabla">
+        <% if (todasCompras.length === 0) { %>
+          <div class="text-center py-5 text-muted"><i class="bi bi-receipt" style="font-size:2.5rem;opacity:0.3;display:block;margin-bottom:10px;"></i>Aún no hay compras registradas.</div>
+        <% } else { %>
+        <div style="overflow-x:auto;">
+          <table class="table mb-0">
+            <thead><tr><th>N° Compra</th><th>Cliente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Total</th><th>Estado</th><th>Ver</th></tr></thead>
+            <tbody>
+              <% todasCompras.forEach(c => { %>
+              <tr data-numero="<%= c.numero_compra %>">
+                <td><span class="fw-bold text-primary" style="font-family:monospace;letter-spacing:1px;"><%= c.numero_compra %></span></td>
+                <td><%= c.usuario_nombre %></td>
+                <td><span class="text-muted small"><%= c.usuario_email %></span></td>
+                <td><%= c.fecha %></td><td><%= c.hora %></td>
+                <td class="fw-bold">$<%= parseInt(c.total).toLocaleString('es-CL') %></td>
+                <td id="estado-<%= c.numero_compra %>">
+                  <% if (c.entregado) { %>
+                    <span class="badge bg-success-subtle text-success fw-semibold" style="font-size:0.78rem;"><i class="bi bi-check-circle-fill me-1"></i>Entregado</span>
+                  <% } else { %>
+                    <span class="badge bg-warning-subtle text-warning fw-semibold" style="font-size:0.78rem;"><i class="bi bi-clock-fill me-1"></i>Pendiente</span>
+                  <% } %>
+                </td>
+                <td><button class="btn btn-sm btn-outline-primary" onclick="verDetalle(this)" data-numero="<%= c.numero_compra %>" data-nombre="<%= c.usuario_nombre %>" data-email="<%= c.usuario_email %>" data-fecha="<%= c.fecha %>" data-hora="<%= c.hora %>" data-total="<%= c.total %>" data-entregado="<%= c.entregado %>" data-fecha-entrega="<%= c.fecha_entrega || '' %>" data-items="<%- Buffer.from(JSON.stringify(JSON.parse(c.items))).toString('base64') %>"><i class="bi bi-eye"></i></button></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
+      </div>
+      <div id="vistaUsuario" style="display:none;">
+        <% const usuariosKeys = Object.keys(comprasPorUsuario); %>
+        <% if (usuariosKeys.length === 0) { %>
+          <div class="text-center py-5 text-muted"><i class="bi bi-person-x" style="font-size:2.5rem;opacity:0.3;display:block;margin-bottom:10px;"></i>Aún no hay compras registradas.</div>
+        <% } else { %>
+        <div class="p-3">
+          <% usuariosKeys.forEach(uid => { const u = comprasPorUsuario[uid]; %>
+          <div class="border rounded-3 mb-3 overflow-hidden">
+            <div class="d-flex align-items-center justify-content-between px-3 py-2" style="background:#f8fafc;cursor:pointer;" onclick="toggleUsuario('u<%- uid %>')">
+              <div class="d-flex align-items-center gap-2">
+                <div style="width:34px;height:34px;border-radius:50%;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;"><%= u.nombre.charAt(0).toUpperCase() %></div>
+                <div><div class="fw-semibold" style="font-size:0.9rem;"><%= u.nombre %></div><div class="text-muted" style="font-size:0.78rem;"><%= u.email %></div></div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary-subtle text-primary"><%= u.compras.length %> compra(s)</span>
+                <i class="bi bi-chevron-down" id="icon-u<%- uid %>"></i>
+              </div>
+            </div>
+            <div id="u<%- uid %>" style="display:none;">
+              <table class="table mb-0" style="font-size:0.875rem;">
+                <thead><tr><th class="ps-3">N° Compra</th><th>Fecha</th><th>Hora</th><th>Total</th><th>Estado</th><th>Ver</th></tr></thead>
+                <tbody>
+                  <% u.compras.forEach(c => { %>
+                  <tr data-numero-u="<%= c.numero_compra %>">
+                    <td class="ps-3"><span class="fw-bold text-primary" style="font-family:monospace;"><%= c.numero_compra %></span></td>
+                    <td><%= c.fecha %></td><td><%= c.hora %></td>
+                    <td class="fw-bold">$<%= parseInt(c.total).toLocaleString('es-CL') %></td>
+                    <td id="estado-u-<%= c.numero_compra %>">
+                      <% if (c.entregado) { %>
+                        <span class="badge bg-success-subtle text-success fw-semibold" style="font-size:0.78rem;"><i class="bi bi-check-circle-fill me-1"></i>Entregado</span>
+                      <% } else { %>
+                        <span class="badge bg-warning-subtle text-warning fw-semibold" style="font-size:0.78rem;"><i class="bi bi-clock-fill me-1"></i>Pendiente</span>
+                      <% } %>
+                    </td>
+                    <td><button class="btn btn-sm btn-outline-primary" onclick="verDetalle(this)" data-numero="<%= c.numero_compra %>" data-nombre="<%= c.usuario_nombre %>" data-email="<%= c.usuario_email %>" data-fecha="<%= c.fecha %>" data-hora="<%= c.hora %>" data-total="<%= c.total %>" data-entregado="<%= c.entregado %>" data-fecha-entrega="<%= c.fecha_entrega || '' %>" data-items="<%- Buffer.from(JSON.stringify(JSON.parse(c.items))).toString('base64') %>"><i class="bi bi-eye"></i></button></td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AGREGAR STOCK -->
+  <div class="modal fade" id="modalAgregarStock" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header" style="background: linear-gradient(135deg,#16a34a,#15803d); color: white;">
+          <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle-fill me-2"></i>Agregar Stock</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-muted mb-1" style="font-size:0.85rem;">Producto</p>
+          <p id="stockModalNombre" class="fw-bold mb-3 fs-6"></p>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div>
+              <p class="text-muted mb-0" style="font-size:0.8rem;">Stock actual</p>
+              <p id="stockModalActual" class="fw-bold fs-5 mb-0 text-dark"></p>
+            </div>
+            <div class="text-success fs-4">+</div>
+            <div class="flex-grow-1">
+              <label class="form-label fw-semibold mb-1" style="font-size:0.85rem;">Cantidad a agregar</label>
+              <input id="stockModalCantidad" type="number" class="form-control" min="1" placeholder="Ej: 10" required>
+            </div>
+          </div>
+          <div class="alert alert-success py-2 px-3" style="font-size:0.85rem; border-radius:8px;">
+            <i class="bi bi-info-circle me-1"></i>
+            El nuevo stock será: <strong id="stockModalNuevo">—</strong>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success fw-semibold" onclick="confirmarAgregarStock()">
+            <i class="bi bi-plus-circle me-1"></i>Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL BOLETA -->
+  <div class="modal fade" id="modalBoleta" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 overflow-hidden border-0 shadow-lg">
+        <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:24px;color:white;text-align:center;">
+          <div style="font-size:1.5rem;font-weight:800;">Jireth Minimarket</div>
+          <div style="opacity:0.8;font-size:13px;">Boleta de Compra</div>
+        </div>
+        <div class="modal-body p-4">
+          <div class="d-flex justify-content-between mb-3 p-3 rounded-3" style="background:#eff6ff;">
+            <div><div class="text-muted" style="font-size:11px;text-transform:uppercase;font-weight:700;">N° Compra</div><div id="b-numero" style="font-size:1.3rem;font-weight:800;color:#2563eb;font-family:monospace;letter-spacing:1px;"></div></div>
+            <div class="text-end">
+              <div class="text-muted" style="font-size:11px;text-transform:uppercase;font-weight:700;">Fecha</div>
+              <div id="b-fecha" class="fw-semibold" style="font-size:13px;"></div>
+              <div class="text-muted mt-1" style="font-size:11px;text-transform:uppercase;font-weight:700;">Hora</div>
+              <div id="b-hora" class="fw-semibold" style="font-size:13px;"></div>
+            </div>
+          </div>
+          <div class="mb-3"><div class="text-muted" style="font-size:11px;text-transform:uppercase;font-weight:700;">Cliente</div><div id="b-nombre" class="fw-semibold"></div></div>
+          <table class="table table-sm mb-3">
+            <thead style="background:#f8fafc;"><tr><th style="font-size:11px;color:#6b7280;text-transform:uppercase;">Producto</th><th style="font-size:11px;color:#6b7280;text-transform:uppercase;text-align:center;">Cant.</th><th style="font-size:11px;color:#6b7280;text-transform:uppercase;text-align:right;">Subtotal</th></tr></thead>
+            <tbody id="b-items"></tbody>
+          </table>
+          <div class="d-flex justify-content-between align-items-center border-top pt-3">
+            <span class="text-muted small fw-bold text-uppercase">Total</span>
+            <span id="b-total" style="font-size:1.4rem;font-weight:800;color:#2563eb;"></span>
+          </div>
+        </div>
+        <!-- Sección de entrega -->
+        <div class="px-4 pb-3">
+          <div id="b-entrega-info" class="alert py-2 px-3 mb-3" style="font-size:0.85rem;border-radius:8px;display:none;">
+            <i class="bi bi-calendar-check me-1"></i>
+            Entregado el: <strong id="b-fecha-entrega"></strong>
+          </div>
+          <button id="b-btn-entrega" class="btn w-100 fw-semibold rounded-3" onclick="toggleEntrega()">
+          </button>
+        </div>
+        <div class="modal-footer border-0 pt-0"><button class="btn btn-secondary rounded-3 w-100" data-bs-dismiss="modal">Cerrar</button></div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const toastEl = document.getElementById('liveToast');
     const toast = new bootstrap.Toast(toastEl);
+
+    function validarPrecio(input) {
+      const val = parseInt(input.value);
+      if (val >= 50000) {
+        input.value = 49999;
+        showNotification("El precio debe ser menor a $50.000", true);
+      }
+    }
+
+    function validarStock(input) {
+      const val = parseInt(input.value);
+      if (val >= 10000) {
+        input.value = 9999;
+        showNotification("El stock debe ser menor a 10.000 unidades", true);
+      }
+    }
 
     function showNotification(msg, isError = false) {
       document.getElementById('toastMsg').textContent = msg;
@@ -304,16 +512,18 @@
 
     function updateItem(id) {
       const precio = document.getElementById('p-'+id).value;
-      const stock = document.getElementById('s-'+id).value;
+      const stockEl = document.getElementById('stock-'+id);
+      const stock = stockEl ? stockEl.textContent.trim() : undefined;
 
       fetch('/admin/editar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, precio, stock })
       })
-      .then(r => {
-        if(r.ok) showNotification('Registro actualizado correctamente');
-        else showNotification('Error al intentar guardar', true);
+      .then(r => r.json().catch(() => ({})).then(data => ({ ok: r.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok && data.success) showNotification('Registro actualizado correctamente');
+        else showNotification(data.error || 'Error al intentar guardar', true);
       })
       .catch(() => showNotification('Fallo de conexión con el servidor', true));
     }
@@ -334,6 +544,147 @@
         tr.style.display = name.includes(q) ? '' : 'none';
       });
     });
+
+    function toggleVista(vista) {
+      document.getElementById('vistaTabla').style.display = vista === 'tabla' ? '' : 'none';
+      document.getElementById('vistaUsuario').style.display = vista === 'usuario' ? '' : 'none';
+      document.getElementById('btnTabla').classList.toggle('active', vista === 'tabla');
+      document.getElementById('btnUsuario').classList.toggle('active', vista === 'usuario');
+    }
+
+    function toggleUsuario(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById('icon-' + id);
+      const visible = el.style.display !== 'none';
+      el.style.display = visible ? 'none' : '';
+      if (icon) icon.style.transform = visible ? '' : 'rotate(180deg)';
+    }
+
+    let _boletaNumero = null;
+    let _boletaEntregado = false;
+
+    function verDetalle(btn) {
+      const d = btn.dataset;
+      _boletaNumero = d.numero;
+      _boletaEntregado = d.entregado === '1';
+
+      document.getElementById('b-numero').textContent = d.numero;
+      document.getElementById('b-nombre').textContent = d.nombre;
+      document.getElementById('b-fecha').textContent = d.fecha;
+      document.getElementById('b-hora').textContent = d.hora;
+      document.getElementById('b-total').textContent = '$' + parseInt(d.total).toLocaleString('es-CL');
+      const items = JSON.parse(atob(d.items));
+      document.getElementById('b-items').innerHTML = items.map(i =>
+        `<tr><td>${i.nombre}</td><td style="text-align:center;">${i.cantidad}</td><td style="text-align:right;font-weight:600;">$${(i.precio * i.cantidad).toLocaleString('es-CL')}</td></tr>`
+      ).join('');
+
+      // Estado de entrega
+      const infoEl = document.getElementById('b-entrega-info');
+      const btnEl = document.getElementById('b-btn-entrega');
+      if (_boletaEntregado) {
+        infoEl.style.display = '';
+        infoEl.className = 'alert alert-success py-2 px-3 mb-3';
+        document.getElementById('b-fecha-entrega').textContent = d.fechaEntrega || '';
+        btnEl.className = 'btn w-100 fw-semibold rounded-3 btn-outline-danger';
+        btnEl.innerHTML = '<i class="bi bi-x-circle me-1"></i>Marcar como No Entregado';
+      } else {
+        infoEl.style.display = 'none';
+        btnEl.className = 'btn w-100 fw-semibold rounded-3 btn-success';
+        btnEl.innerHTML = '<i class="bi bi-check-circle me-1"></i>Marcar como Entregado';
+      }
+
+      new bootstrap.Modal(document.getElementById('modalBoleta')).show();
+    }
+
+    function toggleEntrega() {
+      const nuevoEstado = !_boletaEntregado;
+      fetch('/admin/marcar-entrega', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numero_compra: _boletaNumero, entregado: nuevoEstado })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success) return showNotification('Error al actualizar entrega', true);
+        if (nuevoEstado && data.eliminado) {
+          // El pedido fue movido al historial: cerrar modal y eliminar filas de la tabla
+          bootstrap.Modal.getInstance(document.getElementById('modalBoleta')).hide();
+          // Eliminar fila de vista Todas
+          const filaTabla = document.querySelector(`[data-numero="${_boletaNumero}"]`);
+          if (filaTabla) filaTabla.closest('tr').remove();
+          // Eliminar fila de vista Por usuario
+          const filaUsuario = document.querySelector(`[data-numero-u="${_boletaNumero}"]`);
+          if (filaUsuario) filaUsuario.closest('tr').remove();
+          showNotification('Pedido entregado y movido al historial ✓');
+        } else {
+          _boletaEntregado = nuevoEstado;
+          const infoEl = document.getElementById('b-entrega-info');
+          const btnEl = document.getElementById('b-btn-entrega');
+          infoEl.style.display = 'none';
+          btnEl.className = 'btn w-100 fw-semibold rounded-3 btn-success';
+          btnEl.innerHTML = '<i class="bi bi-check-circle me-1"></i>Marcar como Entregado';
+          ['estado-' + _boletaNumero, 'estado-u-' + _boletaNumero].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '<span class="badge bg-warning-subtle text-warning fw-semibold" style="font-size:0.78rem;"><i class="bi bi-clock-fill me-1"></i>Pendiente</span>';
+          });
+          showNotification('Compra marcada como pendiente');
+        }
+      })
+      .catch(() => showNotification('Fallo de conexión', true));
+    }
+
+    // ── AGREGAR STOCK A PRODUCTO EXISTENTE ──────────────────────────────────
+    let _stockModalId = null;
+    let _stockActual = 0;
+
+    function abrirModalStockFromButton(btn) {
+      abrirModalStock(btn.dataset.id, btn.dataset.nombre, btn.dataset.stock);
+    }
+    function abrirModalStock(id, nombre, stockActual) {
+      _stockModalId = id;
+      _stockActual = parseInt(stockActual) || 0;
+      document.getElementById('stockModalNombre').textContent = nombre;
+      document.getElementById('stockModalActual').textContent = _stockActual;
+      document.getElementById('stockModalCantidad').value = '';
+      document.getElementById('stockModalNuevo').textContent = '—';
+      new bootstrap.Modal(document.getElementById('modalAgregarStock')).show();
+    }
+
+    document.getElementById('stockModalCantidad').addEventListener('input', function() {
+      const cantidad = parseInt(this.value) || 0;
+      document.getElementById('stockModalNuevo').textContent =
+        cantidad > 0 ? (_stockActual + cantidad) : '—';
+    });
+
+    function confirmarAgregarStock() {
+      const cantidad = parseInt(document.getElementById('stockModalCantidad').value);
+      if (!cantidad || cantidad <= 0) {
+        showNotification('Ingresa una cantidad válida mayor a 0', true);
+        return;
+      }
+      if (_stockActual + cantidad >= 10000) {
+        showNotification('El stock no puede llegar a 10.000 unidades o más', true);
+        return;
+      }
+      fetch('/admin/agregar-stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: _stockModalId, cantidad })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          // Actualizar el input de stock en la tabla sin recargar
+          const spanStock = document.getElementById('stock-' + _stockModalId);
+          if (spanStock) spanStock.textContent = data.nuevoStock;
+          bootstrap.Modal.getInstance(document.getElementById('modalAgregarStock')).hide();
+          showNotification(`Stock actualizado: ${data.nuevoStock} unidades`);
+        } else {
+          showNotification(data.error || 'Error al agregar stock', true);
+        }
+      })
+      .catch(() => showNotification('Fallo de conexión con el servidor', true));
+    }
   </script>
 </body>
 </html>

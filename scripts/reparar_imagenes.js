@@ -1,5 +1,7 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./minimarket.db');
+require('dotenv').config();
+const { Pool } = require('pg');
+
+const pool = require('../db'); // Reutilizamos la configuración de conexión desde db.js
 
 // Nueva lista de enlaces VERIFICADOS Y ROBUSTOS para los productos rotos
 // He seleccionado imágenes limpias y profesionales.
@@ -22,29 +24,28 @@ const reparaciones = [
     }
 ];
 
-db.serialize(() => {
-    // Preparamos la sentencia UPDATE. Buscamos por nombre para precisión.
-    const stmt = db.prepare("UPDATE productos SET imagen = ? WHERE nombre = ?");
-    
+async function main() {
     console.log("🛠️ Iniciando reparación de imágenes rotas...");
-
-    let reparados = 0;
-    
-    reparaciones.forEach(prod => {
-        stmt.run(prod.nuevaImagen, prod.nombre, function(err) {
-            if (err) {
+    try {
+        for (const prod of reparaciones) {
+            try {
+                const { rowCount } = await pool.query(
+                    "UPDATE productos SET imagen = $1 WHERE nombre = $2",
+                    [prod.nuevaImagen, prod.nombre]
+                );
+                if (rowCount > 0) {
+                    console.log(`✅ Imagen de ${prod.nombre} reparada con éxito.`);
+                } else {
+                    console.warn(`⚠️ No se encontró el producto ${prod.nombre} para reparar.`);
+                }
+            } catch (err) {
                 console.error(`❌ Error reparando ${prod.nombre}:`, err.message);
-            } else if (this.changes > 0) {
-                console.log(`✅ Imagen de ${prod.nombre} reparada con éxito.`);
-            } else {
-                console.warn(`⚠️ No se encontró el producto ${prod.nombre} para reparar.`);
             }
-        });
-    });
-    
-    stmt.finalize();
-});
+        }
+    } finally {
+        await pool.end();
+        console.log("✨ Proceso de reparación finalizado. Limpia la caché y recarga la web.");
+    }
+}
 
-db.close(() => {
-    console.log("✨ Proceso de reparación finalizado. Limpia la caché y recarga la web.");
-});
+main();

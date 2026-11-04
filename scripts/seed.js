@@ -1,5 +1,7 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./minimarket.db');
+require('dotenv').config();
+const { Pool } = require('pg');
+
+const pool = require('../db'); // Reutilizamos la configuración de conexión desde db.js
 
 const productos = [
     { nombre: 'Coca Cola 1.5L', cat: 'Bebidas', precio: 1500, stock: 20, img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=500&auto=format&fit=crop' },
@@ -9,15 +11,28 @@ const productos = [
     { nombre: 'Detergente Líquido', cat: 'Aseo', precio: 4500, stock: 8, img: 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?q=80&w=500&auto=format&fit=crop' }
 ];
 
-db.serialize(() => {
-    // Limpiamos la tabla para no duplicar
-    db.run("DELETE FROM productos");
-    
-    const stmt = db.prepare("INSERT INTO productos (nombre, categoria, precio, stock, imagen) VALUES (?, ?, ?, ?, ?)");
-    productos.forEach(p => {
-        stmt.run(p.nombre, p.cat, p.precio, p.stock, p.img);
-    });
-    stmt.finalize();
-    console.log("✅ ¡Productos reales cargados exitosamente!");
-});
-db.close();
+async function main() {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        // Limpiamos la tabla para no duplicar
+        await client.query("DELETE FROM productos");
+
+        const insertText = "INSERT INTO productos (nombre, categoria, precio, stock, imagen) VALUES ($1, $2, $3, $4, $5)";
+        for (const p of productos) {
+            await client.query(insertText, [p.nombre, p.cat, p.precio, p.stock, p.img]);
+        }
+
+        await client.query('COMMIT');
+        console.log("✅ ¡Productos reales cargados exitosamente!");
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error("✖ Error en seed:", err.message);
+        process.exitCode = 1;
+    } finally {
+        client.release();
+        await pool.end();
+    }
+}
+
+main();
