@@ -54,17 +54,71 @@
 
     .btn-main { background: var(--primary-color); color: white; font-weight: 500; padding: 0.6rem 1.25rem; border-radius: var(--radius); border: none; transition: background 0.2s; }
     .btn-main:hover { background: var(--primary-hover); color: white; }
-    .action-btn { width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); background: white; color: var(--text-muted); transition: all 0.2s; }
+    
+    .action-btn { width: 34px; height: 34px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); background: white; color: var(--text-muted); transition: all 0.2s; cursor: pointer; }
     .action-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
     .action-btn.delete:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
     .action-btn.btn-agregar-stock:hover { border-color: #16a34a; color: #16a34a; background: #f0fdf4; }
 
-    .badge-stock { padding: 0.35em 0.65em; font-weight: 600; border-radius: 6px; font-size: 0.75rem; }
+    /* Control táctil de stock */
+    .stock-control-group {
+      display: inline-flex;
+      align-items: center;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      width: 140px;
+    }
+    .stock-step-btn {
+      border: none;
+      background: #f1f5f9;
+      color: var(--text-main);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .stock-step-btn:hover {
+      background: #e2e8f0;
+      color: var(--primary-color);
+    }
+    .stock-input-field {
+      border: none;
+      background: transparent;
+      text-align: center;
+      width: 76px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      padding: 0;
+      -moz-appearance: textfield;
+    }
+    .stock-input-field::-webkit-outer-spin-button,
+    .stock-input-field::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .stock-input-field:focus {
+      outline: none;
+      background: #ffffff;
+    }
+
+    .badge-stock { padding: 0.35em 0.65em; font-weight: 600; border-radius: 6px; font-size: 0.72rem; letter-spacing: 0.3px; }
 
     .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 1060; }
   </style>
 </head>
 <body>
+  <% 
+    const itemsProductos = locals.productos || [];
+    const listaCompras = locals.todasCompras || [];
+    const grupoUsuarios = locals.comprasPorUsuario || {};
+  %>
 
   <!-- NAVBAR -->
   <nav class="navbar sticky-top">
@@ -116,6 +170,7 @@
         <div><%= mensajesError[error] || 'No se pudo guardar el producto.' %></div>
       </div>
     <% } %>
+
     <!-- RESUMEN DE MÉTRICAS -->
     <div class="row g-3 mb-4">
       <div class="col-md-3">
@@ -123,7 +178,7 @@
           <div class="d-flex justify-content-between">
             <div>
               <div class="stat-label">Total Productos</div>
-              <div class="stat-value"><%= productos.length %></div>
+              <div class="stat-value" id="cardTotalProductos"><%= itemsProductos.length %></div>
             </div>
             <div class="stat-icon text-primary" style="background:#eff6ff;"><i class="bi bi-box"></i></div>
           </div>
@@ -134,8 +189,8 @@
           <div class="d-flex justify-content-between">
             <div>
               <div class="stat-label">Valor Total</div>
-              <div class="stat-value">
-                $<%= productos.reduce((acc,p)=> acc + (Number(p.precio||0)*Number(p.stock||0)), 0).toLocaleString('es-CL') %>
+              <div class="stat-value" id="cardValorTotal">
+                $<%= itemsProductos.reduce((acc,p)=> acc + (Number(p.precio||0)*Number(p.stock||0)), 0).toLocaleString('es-CL') %>
               </div>
             </div>
             <div class="stat-icon text-success" style="background:#f0fdf4;"><i class="bi bi-currency-dollar"></i></div>
@@ -147,7 +202,7 @@
           <div class="d-flex justify-content-between">
             <div>
               <div class="stat-label">Productos Activos</div>
-              <div class="stat-value"><%= productos.filter(p=>Number(p.stock)>0).length %></div>
+              <div class="stat-value" id="cardProductosActivos"><%= itemsProductos.filter(p=>Number(p.stock)>0).length %></div>
             </div>
             <div class="stat-icon text-info" style="background:#ecfeff;"><i class="bi bi-check-circle"></i></div>
           </div>
@@ -158,7 +213,7 @@
           <div class="d-flex justify-content-between">
             <div>
               <div class="stat-label">Stock Crítico</div>
-              <div class="stat-value text-danger"><%= productos.filter(p=>Number(p.stock)<=5).length %></div>
+              <div class="stat-value text-danger" id="cardStockCritico"><%= itemsProductos.filter(p=>Number(p.stock)<=5).length %></div>
             </div>
             <div class="stat-icon text-danger" style="background:#fef2f2;"><i class="bi bi-exclamation-triangle"></i></div>
           </div>
@@ -181,33 +236,31 @@
             <tr>
               <th>Producto</th>
               <th>Categoría</th>
-              <th style="width: 150px;">Precio Unitario</th>
-              <th style="width: 150px;">Stock Actual</th>
-              <th style="width: 120px;" class="text-end">Acciones</th>
+              <th style="width: 155px;">Precio Unitario</th>
+              <th style="width: 220px;">Stock Actual</th>
+              <th style="width: 140px;" class="text-end">Acciones</th>
             </tr>
           </thead>
           <tbody id="productsBody">
-            <% productos.forEach(p => { %>
-              <tr data-name="<%= (p.nombre||'').toLowerCase() %>">
+            <% itemsProductos.forEach(p => { %>
+              <% 
+                  let rutaImagen = (p.imagen || "").trim();
+                  if (rutaImagen && !rutaImagen.startsWith('http')) {
+                      rutaImagen = rutaImagen.replace(/^public\//, '').replace(/^\//, ''); 
+                      rutaImagen = rutaImagen.startsWith('images/productos') ? '/' + rutaImagen : '/images/productos/' + rutaImagen;
+                  } else if (!rutaImagen) {
+                      rutaImagen = 'https://placehold.co/100x100?text=Sin+Foto';
+                  }
+                  const stockNum = parseInt(p.stock) || 0;
+                  const idFormat = p.id.toString().padStart(4, '0');
+              %>
+              <tr id="row-<%= p.id %>" data-name="<%= (p.nombre||'').toLowerCase() %>" data-id="<%= idFormat %>">
                 <td>
                   <div class="d-flex align-items-center gap-3">
-                    <!-- 🛠️ LÓGICA DE IMÁGENES APLICADA AQUÍ TAMBIÉN -->
-                    <% 
-                        let rutaImagen = p.imagen || "";
-                        if (!rutaImagen.startsWith('http')) {
-                            rutaImagen = rutaImagen.replace(/^public\//, '');
-                            rutaImagen = rutaImagen.replace(/^\//, ''); 
-                            if (!rutaImagen.startsWith('images/productos')) {
-                                rutaImagen = '/images/productos/' + rutaImagen;
-                            } else {
-                                rutaImagen = '/' + rutaImagen;
-                            }
-                        }
-                    %>
-                    <img class="product-img" src="<%= rutaImagen %>" onerror="this.src='https://placehold.co/100x100?text=Sin+Foto'">
+                    <img class="product-img" src="<%= rutaImagen %>" onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=Sin+Foto'">
                     <div>
                       <div class="fw-bold text-dark"><%= p.nombre %></div>
-                      <div class="text-muted" style="font-size: 0.75rem;">ID: #<%= p.id.toString().padStart(4, '0') %></div>
+                      <div class="text-muted" style="font-size: 0.75rem;">ID: #<%= idFormat %></div>
                     </div>
                   </div>
                 </td>
@@ -215,28 +268,33 @@
                 <td>
                   <div class="input-group input-group-sm">
                     <span class="input-group-text">$</span>
-                    <input id="p-<%= p.id %>" type="number" class="form-control" value="<%= p.precio %>" max="49999" oninput="validarPrecio(this)">
+                    <input id="p-<%= p.id %>" type="number" class="form-control" value="<%= p.precio %>" min="1" max="49999" oninput="validarPrecio(this)">
                   </div>
                 </td>
                 <td>
                   <div class="d-flex align-items-center gap-2">
-                    <span id="stock-<%= p.id %>" class="fw-bold fs-6"><%= p.stock %></span>
-                    <% if(Number(p.stock) <= 5) { %>
-                      <span class="badge-stock bg-danger-subtle text-danger">Bajo</span>
-                    <% } else { %>
-                      <span class="badge-stock bg-success-subtle text-success">Ok</span>
-                    <% } %>
+                    <!-- Control interactivo de stock (+ / - y edición directa) -->
+                    <div class="stock-control-group">
+                      <button type="button" class="stock-step-btn" onclick="alterarStock('<%= p.id %>', -1)" title="Restar 1">-</button>
+                      <input id="stock-<%= p.id %>" type="number" class="stock-input-field" value="<%= stockNum %>" min="0" max="9999" oninput="validarStock(this); actualizarBadgeStock('<%= p.id %>');" data-original="<%= stockNum %>">
+                      <button type="button" class="stock-step-btn" onclick="alterarStock('<%= p.id %>', 1)" title="Sumar 1">+</button>
+                    </div>
+
+                    <!-- Badge dinámico de alerta -->
+                    <span id="badge-stock-<%= p.id %>" class="badge-stock <%= stockNum === 0 ? 'bg-danger text-white' : (stockNum <= 5 ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success') %>">
+                      <%= stockNum === 0 ? 'Agotado' : (stockNum <= 5 ? 'Bajo' : 'Ok') %>
+                    </span>
                   </div>
                 </td>
                 <td class="text-end">
                   <div class="d-flex justify-content-end gap-2">
-                    <button class="action-btn" title="Guardar Cambios" onclick="updateItem('<%= p.id %>')">
-                      <i class="bi bi-floppy-fill"></i>
+                    <button class="action-btn" title="Guardar cambios de precio y stock" onclick="updateItem('<%= p.id %>')">
+                      <i class="bi bi-floppy-fill text-primary"></i>
                     </button>
-                    <button class="action-btn btn-agregar-stock" title="Agregar Stock" data-id="<%= p.id %>" data-nombre="<%= p.nombre %>" data-stock="<%= p.stock %>" onclick="abrirModalStockFromButton(this)">
+                    <button id="btn-modal-stock-<%= p.id %>" class="action-btn btn-agregar-stock" title="Agregar lote de stock" data-id="<%= p.id %>" data-nombre="<%= p.nombre %>" data-stock="<%= stockNum %>" onclick="abrirModalStockFromButton(this)">
                       <i class="bi bi-plus-circle-fill"></i>
                     </button>
-                    <button class="action-btn delete" title="Eliminar" onclick="deleteItem('<%= p.id %>')">
+                    <button class="action-btn delete" title="Eliminar producto" onclick="deleteItem('<%= p.id %>')">
                       <i class="bi bi-trash3"></i>
                     </button>
                   </div>
@@ -249,15 +307,14 @@
     </section>
   </main>
 
-  <!-- MODAL: NUEVO PRODUCTO REPARADO (SIN ENCTYPE MULTIPART) -->
-  <div class="modal fade" id="nuevoProducto" tabindex="-1">
+  <!-- MODAL: NUEVO PRODUCTO -->
+  <div class="modal fade" id="nuevoProducto" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow">
         <div class="modal-header">
           <h5 class="fw-bold mb-0">Añadir Nuevo Producto al Catálogo</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <!-- IMPORTANTE: Se quitó el enctype para que NodeJs pueda leer los datos -->
         <form action="/admin/agregar" method="POST" enctype="multipart/form-data">
           <div class="modal-body p-4">
             <div class="mb-3">
@@ -269,7 +326,7 @@
                 <label class="form-label fw-semibold">Precio de Venta</label>
                 <div class="input-group">
                   <span class="input-group-text">$</span>
-                  <input name="precio" type="number" class="form-control" required min="0" max="49999" oninput="validarPrecio(this)">
+                  <input name="precio" type="number" class="form-control" required min="1" max="49999" oninput="validarPrecio(this)">
                 </div>
               </div>
               <div class="col-6">
@@ -289,7 +346,7 @@
             <div class="mt-3">
               <label class="form-label fw-semibold">Imagen del Producto</label>
               <input name="imagen_file" type="file" class="form-control" accept="image/*" required>
-              <div class="form-text" style="font-size:0.8rem;">Sube directamente la imagen desde tu computador (jpg, png, webp).</div>
+              <div class="form-text" style="font-size:0.8rem;">Sube directamente la imagen (jpg, png, webp).</div>
             </div>
           </div>
           <div class="modal-footer bg-light">
@@ -311,14 +368,13 @@
     </div>
   </div>
 
-
-  <!-- ── SECCIÓN BOLETAS ─────────────────────────────────────────────────── -->
+  <!-- SECCIÓN BOLETAS -->
   <div class="container-fluid px-4 pb-5">
     <div class="data-panel mb-4">
       <div class="panel-actions d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="fw-bold d-flex align-items-center gap-2" style="font-size:1rem;">
           <i class="bi bi-receipt text-primary"></i> Boletas de Compra
-          <span class="badge bg-primary-subtle text-primary ms-1"><%= todasCompras.length %></span>
+          <span class="badge bg-primary-subtle text-primary ms-1"><%= listaCompras.length %></span>
         </div>
         <div class="d-flex gap-2 flex-wrap">
           <button class="btn btn-sm btn-outline-secondary active" onclick="toggleVista('tabla')" id="btnTabla"><i class="bi bi-table me-1"></i>Todas</button>
@@ -327,14 +383,14 @@
         </div>
       </div>
       <div id="vistaTabla">
-        <% if (todasCompras.length === 0) { %>
+        <% if (listaCompras.length === 0) { %>
           <div class="text-center py-5 text-muted"><i class="bi bi-receipt" style="font-size:2.5rem;opacity:0.3;display:block;margin-bottom:10px;"></i>Aún no hay compras registradas.</div>
         <% } else { %>
         <div style="overflow-x:auto;">
           <table class="table mb-0">
             <thead><tr><th>N° Compra</th><th>Cliente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Total</th><th>Estado</th><th>Ver</th></tr></thead>
             <tbody>
-              <% todasCompras.forEach(c => { %>
+              <% listaCompras.forEach(c => { %>
               <tr data-numero="<%= c.numero_compra %>">
                 <td><span class="fw-bold text-primary" style="font-family:monospace;letter-spacing:1px;"><%= c.numero_compra %></span></td>
                 <td><%= c.usuario_nombre %></td>
@@ -348,7 +404,20 @@
                     <span class="badge bg-warning-subtle text-warning fw-semibold" style="font-size:0.78rem;"><i class="bi bi-clock-fill me-1"></i>Pendiente</span>
                   <% } %>
                 </td>
-                <td><button class="btn btn-sm btn-outline-primary" onclick="verDetalle(this)" data-numero="<%= c.numero_compra %>" data-nombre="<%= c.usuario_nombre %>" data-email="<%= c.usuario_email %>" data-fecha="<%= c.fecha %>" data-hora="<%= c.hora %>" data-total="<%= c.total %>" data-entregado="<%= c.entregado %>" data-fecha-entrega="<%= c.fecha_entrega || '' %>" data-items="<%- Buffer.from(JSON.stringify(JSON.parse(c.items))).toString('base64') %>"><i class="bi bi-eye"></i></button></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary" onclick="verDetalle(this)" 
+                    data-numero="<%= c.numero_compra %>" 
+                    data-nombre="<%= c.usuario_nombre %>" 
+                    data-email="<%= c.usuario_email %>" 
+                    data-fecha="<%= c.fecha %>" 
+                    data-hora="<%= c.hora %>" 
+                    data-total="<%= c.total %>" 
+                    data-entregado="<%= c.entregado ? '1' : '0' %>" 
+                    data-fecha-entrega="<%= c.fecha_entrega || '' %>" 
+                    data-items="<%- Buffer.from(typeof c.items === 'string' ? c.items : JSON.stringify(c.items)).toString('base64') %>">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </td>
               </tr>
               <% }) %>
             </tbody>
@@ -357,16 +426,16 @@
         <% } %>
       </div>
       <div id="vistaUsuario" style="display:none;">
-        <% const usuariosKeys = Object.keys(comprasPorUsuario); %>
+        <% const usuariosKeys = Object.keys(grupoUsuarios); %>
         <% if (usuariosKeys.length === 0) { %>
           <div class="text-center py-5 text-muted"><i class="bi bi-person-x" style="font-size:2.5rem;opacity:0.3;display:block;margin-bottom:10px;"></i>Aún no hay compras registradas.</div>
         <% } else { %>
         <div class="p-3">
-          <% usuariosKeys.forEach(uid => { const u = comprasPorUsuario[uid]; %>
+          <% usuariosKeys.forEach(uid => { const u = grupoUsuarios[uid]; %>
           <div class="border rounded-3 mb-3 overflow-hidden">
             <div class="d-flex align-items-center justify-content-between px-3 py-2" style="background:#f8fafc;cursor:pointer;" onclick="toggleUsuario('u<%- uid %>')">
               <div class="d-flex align-items-center gap-2">
-                <div style="width:34px;height:34px;border-radius:50%;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;"><%= u.nombre.charAt(0).toUpperCase() %></div>
+                <div style="width:34px;height:34px;border-radius:50%;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;"><%= (u.nombre || 'U').charAt(0).toUpperCase() %></div>
                 <div><div class="fw-semibold" style="font-size:0.9rem;"><%= u.nombre %></div><div class="text-muted" style="font-size:0.78rem;"><%= u.email %></div></div>
               </div>
               <div class="d-flex align-items-center gap-2">
@@ -390,7 +459,20 @@
                         <span class="badge bg-warning-subtle text-warning fw-semibold" style="font-size:0.78rem;"><i class="bi bi-clock-fill me-1"></i>Pendiente</span>
                       <% } %>
                     </td>
-                    <td><button class="btn btn-sm btn-outline-primary" onclick="verDetalle(this)" data-numero="<%= c.numero_compra %>" data-nombre="<%= c.usuario_nombre %>" data-email="<%= c.usuario_email %>" data-fecha="<%= c.fecha %>" data-hora="<%= c.hora %>" data-total="<%= c.total %>" data-entregado="<%= c.entregado %>" data-fecha-entrega="<%= c.fecha_entrega || '' %>" data-items="<%- Buffer.from(JSON.stringify(JSON.parse(c.items))).toString('base64') %>"><i class="bi bi-eye"></i></button></td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-primary" onclick="verDetalle(this)" 
+                        data-numero="<%= c.numero_compra %>" 
+                        data-nombre="<%= c.usuario_nombre %>" 
+                        data-email="<%= c.usuario_email %>" 
+                        data-fecha="<%= c.fecha %>" 
+                        data-hora="<%= c.hora %>" 
+                        data-total="<%= c.total %>" 
+                        data-entregado="<%= c.entregado ? '1' : '0' %>" 
+                        data-fecha-entrega="<%= c.fecha_entrega || '' %>" 
+                        data-items="<%- Buffer.from(typeof c.items === 'string' ? c.items : JSON.stringify(c.items)).toString('base64') %>">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </td>
                   </tr>
                   <% }) %>
                 </tbody>
@@ -404,12 +486,12 @@
     </div>
   </div>
 
-  <!-- MODAL AGREGAR STOCK -->
+  <!-- MODAL: AGREGAR LOTE DE STOCK -->
   <div class="modal fade" id="modalAgregarStock" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow">
         <div class="modal-header" style="background: linear-gradient(135deg,#16a34a,#15803d); color: white;">
-          <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle-fill me-2"></i>Agregar Stock</h5>
+          <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle-fill me-2"></i>Agregar Lote de Stock</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4">
@@ -423,7 +505,7 @@
             <div class="text-success fs-4">+</div>
             <div class="flex-grow-1">
               <label class="form-label fw-semibold mb-1" style="font-size:0.85rem;">Cantidad a agregar</label>
-              <input id="stockModalCantidad" type="number" class="form-control" min="1" placeholder="Ej: 10" required>
+              <input id="stockModalCantidad" type="number" class="form-control" min="1" max="9999" placeholder="Ej: 10" required>
             </div>
           </div>
           <div class="alert alert-success py-2 px-3" style="font-size:0.85rem; border-radius:8px;">
@@ -441,7 +523,7 @@
     </div>
   </div>
 
-  <!-- MODAL BOLETA -->
+  <!-- MODAL: BOLETA -->
   <div class="modal fade" id="modalBoleta" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content rounded-4 overflow-hidden border-0 shadow-lg">
@@ -469,14 +551,12 @@
             <span id="b-total" style="font-size:1.4rem;font-weight:800;color:#2563eb;"></span>
           </div>
         </div>
-        <!-- Sección de entrega -->
         <div class="px-4 pb-3">
           <div id="b-entrega-info" class="alert py-2 px-3 mb-3" style="font-size:0.85rem;border-radius:8px;display:none;">
             <i class="bi bi-calendar-check me-1"></i>
             Entregado el: <strong id="b-fecha-entrega"></strong>
           </div>
-          <button id="b-btn-entrega" class="btn w-100 fw-semibold rounded-3" onclick="toggleEntrega()">
-          </button>
+          <button id="b-btn-entrega" class="btn w-100 fw-semibold rounded-3" onclick="toggleEntrega()"></button>
         </div>
         <div class="modal-footer border-0 pt-0"><button class="btn btn-secondary rounded-3 w-100" data-bs-dismiss="modal">Cerrar</button></div>
       </div>
@@ -486,22 +566,13 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const toastEl = document.getElementById('liveToast');
-    const toast = new bootstrap.Toast(toastEl);
+    const toast = bootstrap.Toast.getOrCreateInstance(toastEl);
 
-    function validarPrecio(input) {
-      const val = parseInt(input.value);
-      if (val >= 50000) {
-        input.value = 49999;
-        showNotification("El precio debe ser menor a $50.000", true);
-      }
-    }
-
-    function validarStock(input) {
-      const val = parseInt(input.value);
-      if (val >= 10000) {
-        input.value = 9999;
-        showNotification("El stock debe ser menor a 10.000 unidades", true);
-      }
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
     }
 
     function showNotification(msg, isError = false) {
@@ -510,10 +581,74 @@
       toast.show();
     }
 
+    function validarPrecio(input) {
+      let val = parseInt(input.value) || 0;
+      if (val >= 50000) {
+        input.value = 49999;
+        showNotification("El precio debe ser menor a $50.000", true);
+      }
+      recalcularMetricas();
+    }
+
+    function validarStock(input) {
+      let val = parseInt(input.value);
+      if (isNaN(val) || val < 0) {
+        input.value = 0;
+      } else if (val >= 10000) {
+        input.value = 9999;
+        showNotification("El stock debe ser menor a 10.000 unidades", true);
+      }
+    }
+
+    // Alterar stock mediante botones rápidos + / -
+    function alterarStock(id, delta) {
+      const input = document.getElementById('stock-' + id);
+      if (!input) return;
+      let actual = parseInt(input.value) || 0;
+      let nuevo = actual + delta;
+      if (nuevo < 0) nuevo = 0;
+      if (nuevo >= 10000) {
+        showNotification("El stock máximo permitido es 9.999", true);
+        return;
+      }
+      input.value = nuevo;
+      actualizarBadgeStock(id);
+      recalcularMetricas();
+    }
+
+    // Actualiza el aspecto del badge según el valor en el input
+    function actualizarBadgeStock(id) {
+      const input = document.getElementById('stock-' + id);
+      const badge = document.getElementById('badge-stock-' + id);
+      const btnModal = document.getElementById('btn-modal-stock-' + id);
+      if (!input || !badge) return;
+
+      const val = parseInt(input.value) || 0;
+      if (btnModal) btnModal.dataset.stock = val;
+
+      if (val === 0) {
+        badge.className = 'badge-stock bg-danger text-white';
+        badge.textContent = 'Agotado';
+      } else if (val <= 5) {
+        badge.className = 'badge-stock bg-danger-subtle text-danger';
+        badge.textContent = 'Bajo';
+      } else {
+        badge.className = 'badge-stock bg-success-subtle text-success';
+        badge.textContent = 'Ok';
+      }
+    }
+
+    // Actualizar producto (guarda Precio Y Stock simultáneamente)
     function updateItem(id) {
-      const precio = document.getElementById('p-'+id).value;
-      const stockEl = document.getElementById('stock-'+id);
-      const stock = stockEl ? stockEl.textContent.trim() : undefined;
+      const precioInput = document.getElementById('p-' + id);
+      const stockInput = document.getElementById('stock-' + id);
+
+      const precio = precioInput ? precioInput.value : null;
+      const stock = stockInput ? stockInput.value : null;
+
+      if (!precio || Number(precio) <= 0) {
+        return showNotification('El precio debe ser mayor a 0', true);
+      }
 
       fetch('/admin/editar', {
         method: 'POST',
@@ -522,29 +657,67 @@
       })
       .then(r => r.json().catch(() => ({})).then(data => ({ ok: r.ok, data })))
       .then(({ ok, data }) => {
-        if (ok && data.success) showNotification('Registro actualizado correctamente');
-        else showNotification(data.error || 'Error al intentar guardar', true);
+        if (ok && data.success) {
+          showNotification('Producto guardado correctamente');
+          if (stockInput) {
+            stockInput.dataset.original = stock;
+            actualizarBadgeStock(id);
+          }
+          recalcularMetricas();
+        } else {
+          showNotification(data.error || 'Error al intentar guardar', true);
+        }
       })
       .catch(() => showNotification('Fallo de conexión con el servidor', true));
     }
 
-    // 🛠️ FUNCIÓN DE ELIMINAR REPARADA (Ahora hace la redirección GET correcta)
+    // Recalcula los totales superiores sin necesidad de recargar la página
+    function recalcularMetricas() {
+      const rows = document.querySelectorAll('#productsBody tr');
+      let totalValor = 0;
+      let activos = 0;
+      let criticos = 0;
+
+      rows.forEach(row => {
+        const pInput = row.querySelector('input[id^="p-"]');
+        const sInput = row.querySelector('input[id^="stock-"]');
+        if (pInput && sInput) {
+          const p = Number(pInput.value) || 0;
+          const s = Number(sInput.value) || 0;
+          totalValor += (p * s);
+          if (s > 0) activos++;
+          if (s <= 5) criticos++;
+        }
+      });
+
+      const elValor = document.getElementById('cardValorTotal');
+      const elActivos = document.getElementById('cardProductosActivos');
+      const elCritico = document.getElementById('cardStockCritico');
+
+      if (elValor) elValor.textContent = '$' + totalValor.toLocaleString('es-CL');
+      if (elActivos) elActivos.textContent = activos;
+      if (elCritico) elCritico.textContent = criticos;
+    }
+
+    // Eliminar producto
     function deleteItem(id) {
-      if(confirm('¿Está seguro de que desea eliminar este producto? Esta acción no se puede deshacer.')) {
+      if (confirm('¿Está seguro de que desea eliminar este producto? Esta acción no se puede deshacer.')) {
         window.location.href = '/admin/eliminar/' + id;
       }
     }
 
-    // Búsqueda en tiempo real
+    // Búsqueda en tiempo real (por nombre y por código ID)
     document.getElementById('searchInput').addEventListener('input', e => {
-      const q = e.target.value.toLowerCase();
+      const q = e.target.value.toLowerCase().trim();
       const rows = document.querySelectorAll('#productsBody tr');
       rows.forEach(tr => {
         const name = tr.dataset.name || '';
-        tr.style.display = name.includes(q) ? '' : 'none';
+        const id = tr.dataset.id || '';
+        tr.style.display = (name.includes(q) || id.includes(q)) ? '' : 'none';
       });
     });
 
+    // Control de vistas de compras
     function toggleVista(vista) {
       document.getElementById('vistaTabla').style.display = vista === 'tabla' ? '' : 'none';
       document.getElementById('vistaUsuario').style.display = vista === 'usuario' ? '' : 'none';
@@ -555,30 +728,40 @@
     function toggleUsuario(id) {
       const el = document.getElementById(id);
       const icon = document.getElementById('icon-' + id);
+      if (!el) return;
       const visible = el.style.display !== 'none';
       el.style.display = visible ? 'none' : '';
       if (icon) icon.style.transform = visible ? '' : 'rotate(180deg)';
     }
 
+    // ── GESTIÓN DE BOLETAS Y ENTREGAS ──────────────────────────────────────────
     let _boletaNumero = null;
     let _boletaEntregado = false;
 
     function verDetalle(btn) {
       const d = btn.dataset;
       _boletaNumero = d.numero;
-      _boletaEntregado = d.entregado === '1';
+      _boletaEntregado = (d.entregado === '1' || d.entregado === 'true');
 
       document.getElementById('b-numero').textContent = d.numero;
       document.getElementById('b-nombre').textContent = d.nombre;
       document.getElementById('b-fecha').textContent = d.fecha;
       document.getElementById('b-hora').textContent = d.hora;
       document.getElementById('b-total').textContent = '$' + parseInt(d.total).toLocaleString('es-CL');
-      const items = JSON.parse(atob(d.items));
-      document.getElementById('b-items').innerHTML = items.map(i =>
-        `<tr><td>${i.nombre}</td><td style="text-align:center;">${i.cantidad}</td><td style="text-align:right;font-weight:600;">$${(i.precio * i.cantidad).toLocaleString('es-CL')}</td></tr>`
-      ).join('');
 
-      // Estado de entrega
+      try {
+        const items = JSON.parse(atob(d.items));
+        document.getElementById('b-items').innerHTML = items.map(i =>
+          `<tr>
+            <td>${escapeHtml(i.nombre)}</td>
+            <td style="text-align:center;">${i.cantidad}</td>
+            <td style="text-align:right;font-weight:600;">$${(i.precio * i.cantidad).toLocaleString('es-CL')}</td>
+          </tr>`
+        ).join('');
+      } catch (err) {
+        document.getElementById('b-items').innerHTML = `<tr><td colspan="3" class="text-danger text-center">Error al leer los artículos</td></tr>`;
+      }
+
       const infoEl = document.getElementById('b-entrega-info');
       const btnEl = document.getElementById('b-btn-entrega');
       if (_boletaEntregado) {
@@ -593,7 +776,7 @@
         btnEl.innerHTML = '<i class="bi bi-check-circle me-1"></i>Marcar como Entregado';
       }
 
-      new bootstrap.Modal(document.getElementById('modalBoleta')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('modalBoleta')).show();
     }
 
     function toggleEntrega() {
@@ -607,14 +790,11 @@
       .then(data => {
         if (!data.success) return showNotification('Error al actualizar entrega', true);
         if (nuevoEstado && data.eliminado) {
-          // El pedido fue movido al historial: cerrar modal y eliminar filas de la tabla
-          bootstrap.Modal.getInstance(document.getElementById('modalBoleta')).hide();
-          // Eliminar fila de vista Todas
-          const filaTabla = document.querySelector(`[data-numero="${_boletaNumero}"]`);
-          if (filaTabla) filaTabla.closest('tr').remove();
-          // Eliminar fila de vista Por usuario
-          const filaUsuario = document.querySelector(`[data-numero-u="${_boletaNumero}"]`);
-          if (filaUsuario) filaUsuario.closest('tr').remove();
+          bootstrap.Modal.getOrCreateInstance(document.getElementById('modalBoleta')).hide();
+          const filaTabla = document.querySelector(`tr[data-numero="${_boletaNumero}"]`);
+          if (filaTabla) filaTabla.remove();
+          const filaUsuario = document.querySelector(`tr[data-numero-u="${_boletaNumero}"]`);
+          if (filaUsuario) filaUsuario.remove();
           showNotification('Pedido entregado y movido al historial ✓');
         } else {
           _boletaEntregado = nuevoEstado;
@@ -633,21 +813,25 @@
       .catch(() => showNotification('Fallo de conexión', true));
     }
 
-    // ── AGREGAR STOCK A PRODUCTO EXISTENTE ──────────────────────────────────
+    // ── MODAL AGREGAR LOTE DE STOCK ─────────────────────────────────────────
     let _stockModalId = null;
     let _stockActual = 0;
 
     function abrirModalStockFromButton(btn) {
       abrirModalStock(btn.dataset.id, btn.dataset.nombre, btn.dataset.stock);
     }
+
     function abrirModalStock(id, nombre, stockActual) {
       _stockModalId = id;
-      _stockActual = parseInt(stockActual) || 0;
+      // Obtener el valor más fresco desde el input de la tabla
+      const inputTable = document.getElementById('stock-' + id);
+      _stockActual = inputTable ? (parseInt(inputTable.value) || 0) : (parseInt(stockActual) || 0);
+
       document.getElementById('stockModalNombre').textContent = nombre;
       document.getElementById('stockModalActual').textContent = _stockActual;
       document.getElementById('stockModalCantidad').value = '';
       document.getElementById('stockModalNuevo').textContent = '—';
-      new bootstrap.Modal(document.getElementById('modalAgregarStock')).show();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('modalAgregarStock')).show();
     }
 
     document.getElementById('stockModalCantidad').addEventListener('input', function() {
@@ -674,10 +858,13 @@
       .then(r => r.json())
       .then(data => {
         if (data.success) {
-          // Actualizar el input de stock en la tabla sin recargar
-          const spanStock = document.getElementById('stock-' + _stockModalId);
-          if (spanStock) spanStock.textContent = data.nuevoStock;
-          bootstrap.Modal.getInstance(document.getElementById('modalAgregarStock')).hide();
+          const inputStock = document.getElementById('stock-' + _stockModalId);
+          if (inputStock) {
+            inputStock.value = data.nuevoStock;
+            actualizarBadgeStock(_stockModalId);
+          }
+          recalcularMetricas();
+          bootstrap.Modal.getOrCreateInstance(document.getElementById('modalAgregarStock')).hide();
           showNotification(`Stock actualizado: ${data.nuevoStock} unidades`);
         } else {
           showNotification(data.error || 'Error al agregar stock', true);
